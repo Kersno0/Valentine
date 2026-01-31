@@ -129,8 +129,8 @@
   width: 820px;
   height: 480px;
   display:flex;
-  justify-content:center;   /* centre horizontalement */
-  align-items:center;       /* centre verticalement */
+  justify-content:center;
+  align-items:center;   /* ← centre verticalement (clé) */
   flex: 1;
 }
 
@@ -159,17 +159,17 @@
 
     /* ===== ENVELOPPE ===== */
     .envelope{
-  width: 760px;              /* taille correcte */
+  width: 760px;
   height: 450px;
   position:relative;
   cursor:pointer;
   user-select:none;
-  transform: translateY(6px); /* léger flottement */
+  margin: 0 auto;
+  transform: none;          /* ← ON SUPPRIME le décalage */
   transition: transform .25s ease;
-  margin: 0 auto;            /* sécurité centrage */
 }
 .envelope:hover{
-  transform: translateY(0px) scale(1.01);
+  transform: scale(1.01);
 }
 
     .env-body{
