@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Une lettre pour toi 💌</title>
+  <style>
+    :root{
+      --bg1:#fff1f5;
+      --bg2:#ffe4ec;
+      --ink:#2b2b2b;
+      --card:#ffffffcc;
+      --shadow: 0 18px 50px rgba(0,0,0,.12);
+      --red:#ff3b6b;
+      --red2:#ff5c84;
+      --gold:#ffcc66;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(900px 400px at 20% 20%, #ffffff 0%, transparent 60%),
+        radial-gradient(700px 350px at 80% 30%, #ffffff 0%, transparent 55%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      overflow-x:hidden;
+    }
+
+    .wrap{
+      width:min(960px, 92vw);
+      display:grid;
+      gap:22px;
+      align-items:center;
+      justify-items:center;
+      padding:28px 0 40px;
+    }
+
+    h1{
+      margin:0;
+      font-weight:800;
+      letter-spacing:-0.02em;
+      text-align:center;
+      font-size: clamp(22px, 3vw, 34px);
+    }
+    .sub{
+      margin:0;
+      text-align:center;
+      opacity:.8;
+      max-width: 44ch;
+      line-height:1.35;
+    }
+
+    /* Card */
+    .card{
+      width:min(820px, 100%);
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.6);
+      border-radius:26px;
+      box-shadow:var(--shadow);
+      padding:22px 18px 26px;
+      display:grid;
+      gap:18px;
+      justify-items:center;
+      position:relative;
+      backdrop-filter: blur(10px);
+    }
+
+    /* Envelope */
+    .envelope-area{
+      width:min(520px, 92vw);
+      height: 340px;
+      display:grid;
+      place-items:center;
+      position:relative;
+    }
+
+    .envelope{
+      width: 420px;
+      height: 260px;
+      position:relative;
+      cursor:pointer;
+      transform: translateY(6px);
+      transition: transform .25s ease;
+      user-select:none;
+    }
+    .envelope:hover{ transform: translateY(0px) scale(1.01); }
+
+    .env-body{
+      position:absolute;
+      inset:0;
+      background: linear-gradient(180deg, #fff, #fff7fa);
+      border-radius: 18px;
+      border: 2px solid rgba(0,0,0,.06);
+      box-shadow: 0 14px 34px rgba(0,0,0,.10);
+      overflow:hidden;
+    }
+
+    /* Bottom triangles */
+    .env-bottom{
+      position:absolute;
+      left:0; right:0; bottom:0;
+      height: 75%;
+      background:
+        linear-gradient(135deg, transparent 50%, rgba(255,59,107,.18) 50%) left/50% 100% no-repeat,
+        linear-gradient(225deg, transparent 50%, rgba(255,59,107,.18) 50%) right/50% 100% no-repeat;
+      opacity:.9;
+    }
+
+    /* Flap */
+    .flap{
+      position:absolute;
+      left:0; right:0; top:0;
+      height: 60%;
+      transform-origin: top center;
+      transform: rotateX(0deg);
+      transition: transform .9s cubic-bezier(.2,.9,.2,1);
+      z-index: 5;
+      background:
+        linear-gradient(135deg, transparent 50%, rgba(255,59,107,.22) 50%) left/50% 100% no-repeat,
+        linear-gradient(225deg, transparent 50%, rgba(255,59,107,.22) 50%) right/50% 100% no-repeat;
+      border-top-left-radius:18px;
+      border-top-right-radius:18px;
+      filter: drop-shadow(0 6px 10px rgba(0,0,0,.10));
+    }
+
+    /* Seal */
+    .seal{
+      position:absolute;
+      left:50%; top:54%;
+      transform: translate(-50%,-50%);
+      width: 74px; height: 74px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff 0%, rgba(255,255,255,.25) 22%, transparent 25%),
+                  linear-gradient(135deg, var(--red), var(--red2));
+      box-shadow: 0 12px 24px rgba(255,59,107,.35);
+      display:grid;
+      place-items:center;
+      z-index: 6;
+      border: 2px solid rgba(255,255,255,.55);
+    }
+    .seal span{
+      font-size: 30px;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.15));
+    }
+
+    /* Letter */
+    .letter{
+      position:absolute;
+      left:50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      width: 360px;
+      height: 220px;
+      background: #fff;
+      border-radius: 16px;
+      border: 2px solid rgba(0,0,0,.06);
+      box-shadow: 0 18px 40px rgba(0,0,0,.12);
+      padding: 18px 18px 16px;
+      z-index: 4;
+      transition: transform .9s cubic-bezier(.2,.9,.2,1), opacity .4s ease;
+      opacity: 0;
+      transform: translateX(-50%) translateY(55px);
+    }
+    .letter .topline{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .badge{
+      font-weight:700;
+      font-size:12px;
+      padding:6px 10px;
+      border-radius:999px;
+      background: rgba(255,59,107,.12);
+      color:#b3123b;
+    }
+    .stamp{
+      width:34px; height:34px;
+      border-radius:10px;
+      background: linear-gradient(135deg, #ffe08a, #ffbf4d);
+      box-shadow: 0 8px 18px rgba(255,204,102,.35);
+    }
+    .letter p{
+      margin:0;
+      line-height:1.4;
+      font-size: 15px;
+    }
+    .letter .sig{
+      margin-top: 14px;
+      font-weight:700;
+    }
+
+    /* Open state */
+    .open .flap{ transform: rotateX(160deg); }
+    .open .letter{
+      opacity: 1;
+      transform: translateX(-50%) translateY(-26px);
+    }
+
+    /* Buttons */
+    .actions{
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      justify-content:center;
+      margin-top: 14px;
+    }
+    button{
+      border:0;
+      padding:12px 16px;
+      border-radius: 14px;
+      font-weight:800;
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .2s ease, opacity .2s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,.10);
+    }
+    .yes{
+      background: linear-gradient(135deg, var(--red), var(--red2));
+      color:white;
+    }
+    .no{
+      background: white;
+      color:#333;
+      border:2px solid rgba(0,0,0,.08);
+    }
+    button:hover{ transform: translateY(-1px); }
+    button:active{ transform: translateY(1px) scale(.99); }
+
+    /* Result */
+    .result{
+      min-height: 28px;
+      text-align:center;
+      font-weight:800;
+      font-size: 16px;
+    }
+
+    /* Floating hearts */
+    .hearts{
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      overflow:hidden;
+      border-radius:26px;
+    }
+    .heart{
+      position:absolute;
+      font-size: 18px;
+      opacity: 0;
+      animation: floatUp 1.6s ease forwards;
+      filter: drop-shadow(0 6px 10px rgba(255,59,107,.18));
+    }
+    @keyframes floatUp{
+      0%{ transform: translateY(20px) scale(.9); opacity:0; }
+      15%{ opacity:1; }
+      100%{ transform: translateY(-120px) scale(1.25); opacity:0; }
+    }
+
+    /* Mobile tweaks */
+    @media (max-width: 480px){
+      .envelope{ width: 340px; height: 230px; }
+      .letter{ width: 305px; height: 225px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <h1>J’ai une petite lettre pour toi 💌</h1>
+    <p class="sub">Clique sur l’enveloppe pour l’ouvrir…</p>
+
+    <section class="card" aria-label="Carte Valentine">
+      <div class="hearts" id="hearts"></div>
+
+      <div class="envelope-area">
+        <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
+          <div class="env-body">
+            <div class="env-bottom"></div>
+          </div>
+          <div class="flap"></div>
+          <div class="seal"><span>❤</span></div>
+
+          <article class="letter" id="letter" aria-live="polite">
+            <div class="topline">
+              <span class="badge">Pour toi</span>
+              <span class="stamp" aria-hidden="true"></span>
+            </div>
+
+            <p id="msg">
+              Coucou toi 💖<br><br>
+              J’ai une question très importante…<br>
+              Est-ce que tu veux être ma Valentine ? 🥺✨
+            </p>
+
+            <div class="actions">
+              <button class="yes" id="yesBtn">Oui 💘</button>
+              <button class="no" id="noBtn">Non 🙈</button>
+            </div>
+
+            <p class="sig" id="sig">— Ton amoureux</p>
+          </article>
+        </div>
+      </div>
+
+      <div class="result" id="result"></div>
+      <small style="opacity:.7;text-align:center;display:block;">
+        (Astuce : tu peux personnaliser le texte dans le code : “Coucou toi…”)
+      </small>
+    </section>
+  </main>
+
+  <script>
+    const envelope = document.getElementById("envelope");
+    const result = document.getElementById("result");
+    const hearts = document.getElementById("hearts");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+
+    let isOpen = false;
+
+    function toggleOpen(){
+      isOpen = !isOpen;
+      envelope.classList.toggle("open", isOpen);
+      if (isOpen) burstHearts(10);
+    }
+
+    envelope.addEventListener("click", (e) => {
+      // Si elle clique sur les boutons, ne re-toggle pas l'enveloppe
+      if (e.target.tagName.toLowerCase() === "button") return;
+      toggleOpen();
+    });
+
+    envelope.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") toggleOpen();
+    });
+
+    function burstHearts(n){
+      const rect = hearts.getBoundingClientRect();
+      for (let i=0; i<n; i++){
+        const h = document.createElement("div");
+        h.className = "heart";
+        h.textContent = ["💖","💘","💗","💝","💕"][Math.floor(Math.random()*5)];
+        h.style.left = Math.random() * (rect.width - 20) + "px";
+        h.style.bottom = (20 + Math.random()*30) + "px";
+        h.style.animationDelay = (Math.random()*0.15) + "s";
+        hearts.appendChild(h);
+        setTimeout(() => h.remove(), 1800);
+      }
+    }
+
+    yesBtn.addEventListener("click", () => {
+      result.textContent = "OUIIIII 💞💞💞 Je suis trop heureux 😭";
+      burstHearts(18);
+    });
+
+    // Petit effet rigolo : le bouton "Non" fuit le curseur (mignon, pas méchant)
+    noBtn.addEventListener("mouseenter", () => {
+      const dx = (Math.random() * 160) - 80;
+      const dy = (Math.random() * 70) - 35;
+      noBtn.style.transform = `translate(${dx}px, ${dy}px)`;
+      noBtn.style.opacity = "0.9";
+    });
+
+    noBtn.addEventListener("click", () => {
+      result.textContent = "Hmm… on en reparle avec un chocolat ? 😄🍫";
+      burstHearts(6);
+    });
+  </script>
+</body>
+</html>
