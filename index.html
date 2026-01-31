@@ -40,23 +40,24 @@ audio{display:none}
 
 .card{
   background:rgba(255,255,255,.75);
+  max-width: 1100px;
   border-radius:30px;
   padding:25px;
   box-shadow:0 20px 60px rgba(0,0,0,.15);
 }
 
 .row{
-  display:flex;
-  gap:30px;
-  align-items:center;
-  justify-content:center;
-  flex-wrap:wrap;
+  display: flex;
+  justify-content: space-between; /* gauche / droite */
+  align-items: center;            /* centrage vertical parfait */
+  gap: 60px;
 }
 
 /* ===== IMAGES PLUS PETITES ===== */
 .frame{
   width:200px;              /* image plus petite */
   aspect-ratio:4/5;
+  align-self: center;
   border-radius:22px;
   overflow:hidden;
   position:relative;
@@ -77,12 +78,12 @@ audio{display:none}
 
 /* ===== ENVELOPPE PLUS GROSSE & CENTRÉE ===== */
 .envelope-area{
-  width:100%;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  height:460px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
 }
+
 
 .envelope{
   width:700px;      /* enveloppe plus large */
