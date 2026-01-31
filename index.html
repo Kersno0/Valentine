@@ -126,16 +126,14 @@
 
     /* Zone enveloppe (taille du rectangle rouge de droite) */
     .env-zone{
-  width: 820px;
-  height: 480px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  flex: 1;
-
-  /* ✅ empêche d'être collé au bord droit */
-  padding-right: 60px;
-}
+      width: 820px;
+      height: 480px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex: 1;
+      /* pas de bordure visible */
+    }
 
     /* ===== PHOTO ===== */
     .frame{
@@ -162,18 +160,15 @@
 
     /* ===== ENVELOPPE ===== */
     .envelope{
-  width: 760px;
-  height: 450px;
-  position:relative;
-  cursor:pointer;
-  user-select:none;
-  margin: 0 auto;
-  transform: none;          /* ← ON SUPPRIME le décalage */
-  transition: transform .25s ease;
-}
-.envelope:hover{
-  transform: scale(1.01);
-}
+      width: 760px;     /* plus gros */
+      height: 450px;
+      position:relative;
+      cursor:pointer;
+      user-select:none;
+      transform: translateY(6px);
+      transition: transform .25s ease;
+    }
+    .envelope:hover{ transform: translateY(0px) scale(1.01); }
 
     .env-body{
       position:absolute;
@@ -350,12 +345,12 @@
       letter-spacing:-0.02em;
     }
 
-    /* ✅ AJOUT : style du texte en dessous */
+    /* ✅ AJOUT : style du texte sous le titre */
     .final-sub{
-      margin-top: 8px;
-      font-size: clamp(16px, 2.2vw, 22px);
+      margin-top: 6px;
+      font-size: clamp(16px, 2.1vw, 20px);
       font-weight: 900;
-      opacity: .92;
+      opacity: .9;
     }
 
     .big-heart{
@@ -460,6 +455,8 @@
     <div class="final-card">
       <div class="big-heart">❤️</div>
       <div class="final-title">Je t’aime Hemen, pour toujours ✨</div>
+
+      <!-- ✅ AJOUT : texte sous le titre -->
       <div class="final-sub">Rendez-vous le 13 pour la nuit de folie 😉✨</div>
     </div>
   </div>
@@ -531,7 +528,6 @@
     function openEnvelope(){
       isOpen = true;
       envelope.classList.add("open");
-      // ✅ plan B : même si le CSS rate, on cache direct le sceau
       if(seal){
         seal.style.opacity = "0";
         seal.style.visibility = "hidden";
@@ -544,7 +540,6 @@
     function closeEnvelope(){
       isOpen = false;
       envelope.classList.remove("open");
-      // ré-affiche le sceau
       if(seal){
         seal.style.opacity = "";
         seal.style.visibility = "";
@@ -583,7 +578,6 @@
         setTimeout(() => p.remove(), 1750);
       }
     }
-
     function heartFireworks(durationMs=3600){
       const start = Date.now();
       const tick = () => {
