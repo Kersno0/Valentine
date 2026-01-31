@@ -94,13 +94,13 @@
       100%{ transform: translateY(-820px) translateX(var(--drift)) scale(1.35); opacity:0; }
     }
 
-    /* ======= LAYOUT (NE CHANGE PAS) ======= */
+    /* ======= LAYOUT (reprend tes rectangles rouges mais invisibles) ======= */
     .row{
       display:flex;
       align-items:center;
       justify-content:space-between;
-      gap:56px;
-      padding: 8px 18px; /* marge -> pas collé aux bords */
+      gap:50px;
+      padding: 10px 24px;
       position:relative;
       z-index:1;
     }
@@ -109,21 +109,42 @@
         flex-direction:column;
         justify-content:center;
         gap:18px;
-        padding: 6px 10px;
+        padding: 10px 12px;
       }
     }
 
-    /* Photo à gauche */
+    /* Zone photo (taille du rectangle rouge de gauche) */
+    .photo-zone{
+      width: 340px;
+      height: 420px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex: 0 0 auto;
+      /* pas de bordure visible */
+    }
+
+    /* Zone enveloppe (taille du rectangle rouge de droite) */
+    .env-zone{
+      width: 820px;
+      height: 480px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      flex: 1;
+      /* pas de bordure visible */
+    }
+
+    /* ===== PHOTO ===== */
     .frame{
-      width: 270px;              /* taille photo */
-      aspect-ratio: 4/5;
+      width: 285px;            /* un peu plus grande comme tu voulais */
+      aspect-ratio:4/5;
       border-radius:26px;
       overflow:hidden;
       position:relative;
       border:3px solid gold;
       box-shadow:0 15px 35px rgba(0,0,0,.2);
       background:#fff;
-      flex: 0 0 auto;
     }
     .slides{ width:100%; height:100%; position:relative; }
     .slides img{
@@ -137,18 +158,15 @@
     }
     .slides img.active{ opacity:1; }
 
-    /* Enveloppe à droite */
+    /* ===== ENVELOPPE ===== */
     .envelope{
-      width: 700px;
-      height: 430px;
+      width: 760px;     /* plus gros */
+      height: 450px;
       position:relative;
       cursor:pointer;
       user-select:none;
       transform: translateY(6px);
       transition: transform .25s ease;
-      flex: 1;
-      display:block;
-      margin-right: 8px;  /* petit espace avec le bord droit */
     }
     .envelope:hover{ transform: translateY(0px) scale(1.01); }
 
@@ -209,12 +227,14 @@
       filter: drop-shadow(0 2px 2px rgba(0,0,0,.14));
     }
 
-    /* ✅ IMPORTANT : on cache le sceau quand l’enveloppe a la classe open */
-    .envelope.open .seal{
-      opacity: 0;
-      visibility: hidden;
-      pointer-events: none;
-      transform: translate(-50%,-50%) scale(0.85);
+    /* ✅ On cache le sceau quand ouvert (plusieurs cas) */
+    .open .seal,
+    .envelope.open .seal,
+    #envelope.open .seal{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transform: translate(-50%,-50%) scale(.85);
     }
 
     /* Lettre */
@@ -222,14 +242,14 @@
       position:absolute;
       left:50%;
       bottom: 18px;
-      width: 450px;
-      height: 305px;
+      width: 470px;
+      height: 315px;
       background: #fff;
       border-radius: 18px;
       border: 2px solid rgba(0,0,0,.06);
       box-shadow: 0 18px 40px rgba(0,0,0,.12);
       padding: 18px 18px 16px;
-      z-index: 10; /* au-dessus */
+      z-index: 10;
       opacity: 0;
       transform: translateX(-50%) translateY(62px);
       transition: transform .9s cubic-bezier(.2,.9,.2,1), opacity .4s ease;
@@ -356,15 +376,16 @@
     }
 
     @media (max-width: 520px){
-      .frame{ width: 240px; }
-      .envelope{ width: 430px; height: 285px; margin-right: 0; }
+      .photo-zone{ width: 320px; height: 380px; }
+      .env-zone{ width: 320px; height: 380px; }
+      .frame{ width: 250px; }
+      .envelope{ width: 430px; height: 285px; }
       .letter{ width: 320px; height: 300px; }
     }
   </style>
 </head>
 
 <body>
-  <!-- Musique : on tente autoplay (peut être bloqué par le navigateur) -->
   <audio id="song" preload="auto" autoplay loop>
     <source src="song.mp3" type="audio/mpeg">
   </audio>
@@ -377,39 +398,43 @@
       <div class="ambient" id="ambient"></div>
 
       <div class="row">
-        <!-- PHOTO à gauche -->
-        <div class="frame">
-          <div class="slides" id="slides">
-            <img src="Photo1.jpeg" alt="Nous deux 1" class="active">
-            <img src="Photo2.jpeg" alt="Nous deux 2">
-            <img src="Photo3.jpeg" alt="Nous deux 3">
+        <!-- Zone photo (taille repère) -->
+        <div class="photo-zone">
+          <div class="frame">
+            <div class="slides" id="slides">
+              <img src="Photo1.jpeg" alt="Nous deux 1" class="active">
+              <img src="Photo2.jpeg" alt="Nous deux 2">
+              <img src="Photo3.jpeg" alt="Nous deux 3">
+            </div>
           </div>
         </div>
 
-        <!-- ENVELOPPE à droite -->
-        <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
-          <div class="env-body">
-            <div class="env-bottom"></div>
-          </div>
-          <div class="flap"></div>
-
-          <div class="seal"><span>❤</span></div>
-
-          <article class="letter" id="letter" aria-live="polite">
-            <p>
-              Coucou Hemen mon amour 💖<br><br>
-              J’avais envie de te dire quelque chose de simple mais sincère…<br>
-              Avec toi, tout est plus doux.<br><br>
-              Est-ce que tu veux être ma Valentine ? ✨
-            </p>
-
-            <div class="actions">
-              <button class="yes" id="yesBtn">Oui 💘</button>
-              <button class="think" id="thinkBtn">Je dois réfléchir 🤔</button>
+        <!-- Zone enveloppe (taille repère) -->
+        <div class="env-zone">
+          <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
+            <div class="env-body">
+              <div class="env-bottom"></div>
             </div>
+            <div class="flap"></div>
 
-            <p style="margin-top:10px;font-weight:1000;text-align:right;">— Ton amoureux</p>
-          </article>
+            <div class="seal" id="seal"><span>❤</span></div>
+
+            <article class="letter" id="letter" aria-live="polite">
+              <p>
+                Coucou Hemen mon amour 💖<br><br>
+                J’avais envie de te dire quelque chose de simple mais sincère…<br>
+                Avec toi, tout est plus doux.<br><br>
+                Est-ce que tu veux être ma Valentine ? ✨
+              </p>
+
+              <div class="actions">
+                <button class="yes" id="yesBtn">Oui 💘</button>
+                <button class="think" id="thinkBtn">Je dois réfléchir 🤔</button>
+              </div>
+
+              <p style="margin-top:10px;font-weight:1000;text-align:right;">— Ton amoureux</p>
+            </article>
+          </div>
         </div>
       </div>
 
@@ -428,6 +453,7 @@
 
   <script>
     const envelope = document.getElementById("envelope");
+    const seal = document.getElementById("seal");
     const result = document.getElementById("result");
     const yesBtn = document.getElementById("yesBtn");
     const thinkBtn = document.getElementById("thinkBtn");
@@ -471,7 +497,7 @@
     }
     setInterval(nextSlide, 3200);
 
-    // Audio : essaye au chargement, sinon au 1er clic
+    // Audio : autoplay + fallback clic
     async function tryAutoPlay(){
       try{
         song.volume = 0.85;
@@ -489,15 +515,29 @@
 
     function openEnvelope(){
       isOpen = true;
-      envelope.classList.add("open");   // ✅ indispensable
+      envelope.classList.add("open");
+      // ✅ plan B : même si le CSS rate, on cache direct le sceau
+      if(seal){
+        seal.style.opacity = "0";
+        seal.style.visibility = "hidden";
+        seal.style.pointerEvents = "none";
+      }
       result.textContent = "";
       unlockAudio();
     }
+
     function closeEnvelope(){
       isOpen = false;
       envelope.classList.remove("open");
+      // ré-affiche le sceau
+      if(seal){
+        seal.style.opacity = "";
+        seal.style.visibility = "";
+        seal.style.pointerEvents = "";
+      }
       result.textContent = "";
     }
+
     function toggleOpen(){
       if(isOpen) closeEnvelope();
       else openEnvelope();
@@ -558,12 +598,11 @@
 
     thinkBtn.addEventListener("click", (e) => {
       e.stopPropagation();
-      openEnvelope(); // reste ouvert
+      openEnvelope();
       result.textContent = "Réessaie… tu t’es trompée 😇💗";
       doShake();
     });
 
-    // 1er clic n’importe où débloque l’audio si besoin
     window.addEventListener("pointerdown", unlockAudio, { once: true });
   </script>
 </body>
