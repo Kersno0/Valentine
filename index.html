@@ -100,7 +100,7 @@
   grid-template-columns: 340px 820px; /* photo-zone | env-zone */
   align-items:center;
   justify-content:center;            /* ✅ centre les 2 colonnes ensemble */
-  column-gap: 70px;                  /* espace entre photo et enveloppe */
+  column-gap: 50px;                  /* espace entre photo et enveloppe */
   padding: 10px 24px;
   position:relative;
   z-index:1;
@@ -160,14 +160,18 @@
 
     /* ===== ENVELOPPE ===== */
     .envelope{
-      width: 760px;     /* plus gros */
-      height: 450px;
-      position:relative;
-      cursor:pointer;
-      user-select:none;
-      transform: translateY(6px);
-      transition: transform .25s ease;
-    }
+  width: 760px;
+  height: 450px;
+  position:relative;
+  cursor:pointer;
+  user-select:none;
+
+  /* ✅ DÉCALAGE VERS LA GAUCHE */
+  transform: translateX(-70px) translateY(6px);
+
+  transition: transform .25s ease;
+}
+
     .envelope:hover{ transform: translateY(0px) scale(1.01); }
 
     .env-body{
