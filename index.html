@@ -94,13 +94,13 @@
       100%{ transform: translateY(-820px) translateX(var(--drift)) scale(1.35); opacity:0; }
     }
 
-    /* ======= LAYOUT GENERAL ======= */
+    /* ======= LAYOUT (NE CHANGE PAS) ======= */
     .row{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:56px;
-      padding: 8px 18px;
+      padding: 8px 18px; /* marge -> pas collé aux bords */
       position:relative;
       z-index:1;
     }
@@ -113,34 +113,9 @@
       }
     }
 
-    /* ======= ZONES (rectangles rouges) ======= */
-    /* Mets DEBUG_ZONES = false dans le JS pour les enlever */
-    .photo-zone{
-      width: 340px;
-      height: 420px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      flex: 0 0 auto;
-      outline: 4px solid rgba(255,0,0,.95);
-      outline-offset: -4px;
-      border-radius: 16px;
-    }
-    .envelope-zone{
-      width: 820px;
-      height: 480px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      flex: 1;
-      outline: 4px solid rgba(255,0,0,.95);
-      outline-offset: -4px;
-      border-radius: 16px;
-    }
-
-    /* ===== PHOTO ===== */
+    /* Photo à gauche */
     .frame{
-      width: 270px;
+      width: 270px;              /* taille photo */
       aspect-ratio: 4/5;
       border-radius:26px;
       overflow:hidden;
@@ -148,6 +123,7 @@
       border:3px solid gold;
       box-shadow:0 15px 35px rgba(0,0,0,.2);
       background:#fff;
+      flex: 0 0 auto;
     }
     .slides{ width:100%; height:100%; position:relative; }
     .slides img{
@@ -161,15 +137,7 @@
     }
     .slides img.active{ opacity:1; }
 
-    /* ===== ENVELOPPE ===== */
-    .envelope-area{
-      width:100%;
-      height:100%;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
-
+    /* Enveloppe à droite */
     .envelope{
       width: 700px;
       height: 430px;
@@ -178,6 +146,9 @@
       user-select:none;
       transform: translateY(6px);
       transition: transform .25s ease;
+      flex: 1;
+      display:block;
+      margin-right: 8px;  /* petit espace avec le bord droit */
     }
     .envelope:hover{ transform: translateY(0px) scale(1.01); }
 
@@ -214,7 +185,7 @@
       filter: drop-shadow(0 6px 10px rgba(0,0,0,.10));
     }
 
-    /* ===== SCEAU (bouton coeur) ===== */
+    /* Sceau */
     .seal{
       position:absolute;
       left:50%;
@@ -238,15 +209,12 @@
       filter: drop-shadow(0 2px 2px rgba(0,0,0,.14));
     }
 
-    /* ✅ Cache le sceau QUAND OUVERT (3 sécurités) */
-    .envelope.open .seal,
-    #envelope.open .seal,
-    .open .seal{
+    /* ✅ IMPORTANT : on cache le sceau quand l’enveloppe a la classe open */
+    .envelope.open .seal{
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
       transform: translate(-50%,-50%) scale(0.85);
-      z-index: -1;
     }
 
     /* Lettre */
@@ -261,7 +229,7 @@
       border: 2px solid rgba(0,0,0,.06);
       box-shadow: 0 18px 40px rgba(0,0,0,.12);
       padding: 18px 18px 16px;
-      z-index: 10; /* ✅ au-dessus de tout */
+      z-index: 10; /* au-dessus */
       opacity: 0;
       transform: translateX(-50%) translateY(62px);
       transition: transform .9s cubic-bezier(.2,.9,.2,1), opacity .4s ease;
@@ -306,7 +274,6 @@
       transform: translateX(-50%) translateY(-38px);
     }
 
-    /* petit shake taquin */
     .shake{ animation: shake .35s ease; }
     @keyframes shake{
       0%{ transform: translateY(6px) rotate(0deg); }
@@ -388,37 +355,16 @@
       100%{ transform: translate(var(--x), var(--y)) scale(1.25); opacity:0; }
     }
 
-    /* Petit bandeau si autoplay bloqué */
-    .audio-tip{
-      position: fixed;
-      top: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(255,255,255,.85);
-      border: 1px solid rgba(0,0,0,.06);
-      box-shadow: 0 10px 30px rgba(0,0,0,.10);
-      padding: 10px 14px;
-      border-radius: 14px;
-      font-weight: 800;
-      z-index: 99;
-      display:none;
-    }
-    .audio-tip.show{ display:block; }
-
     @media (max-width: 520px){
-      .photo-zone{ width: 320px; height: 360px; }
-      .envelope-zone{ width: 320px; height: 380px; }
       .frame{ width: 240px; }
-      .envelope{ width: 430px; height: 285px; }
+      .envelope{ width: 430px; height: 285px; margin-right: 0; }
       .letter{ width: 320px; height: 300px; }
     }
   </style>
 </head>
 
 <body>
-  <div class="audio-tip" id="audioTip">🔊 Clique pour activer la musique</div>
-
-  <!-- Musique : on tente autoplay -->
+  <!-- Musique : on tente autoplay (peut être bloqué par le navigateur) -->
   <audio id="song" preload="auto" autoplay loop>
     <source src="song.mp3" type="audio/mpeg">
   </audio>
@@ -431,44 +377,39 @@
       <div class="ambient" id="ambient"></div>
 
       <div class="row">
-        <div class="photo-zone">
-          <div class="frame">
-            <div class="slides" id="slides">
-              <img src="Photo1.jpeg" alt="Nous deux 1" class="active">
-              <img src="Photo2.jpeg" alt="Nous deux 2">
-              <img src="Photo3.jpeg" alt="Nous deux 3">
-            </div>
+        <!-- PHOTO à gauche -->
+        <div class="frame">
+          <div class="slides" id="slides">
+            <img src="Photo1.jpeg" alt="Nous deux 1" class="active">
+            <img src="Photo2.jpeg" alt="Nous deux 2">
+            <img src="Photo3.jpeg" alt="Nous deux 3">
           </div>
         </div>
 
-        <div class="envelope-zone">
-          <div class="envelope-area">
-            <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
-              <div class="env-body">
-                <div class="env-bottom"></div>
-              </div>
-              <div class="flap"></div>
-
-              <!-- Sceau -->
-              <div class="seal"><span>❤</span></div>
-
-              <article class="letter" id="letter" aria-live="polite">
-                <p>
-                  Coucou Hemen mon amour 💖<br><br>
-                  J’avais envie de te dire quelque chose de simple mais sincère…<br>
-                  Avec toi, tout est plus doux.<br><br>
-                  Est-ce que tu veux être ma Valentine ? ✨
-                </p>
-
-                <div class="actions">
-                  <button class="yes" id="yesBtn">Oui 💘</button>
-                  <button class="think" id="thinkBtn">Je dois réfléchir 🤔</button>
-                </div>
-
-                <p style="margin-top:10px;font-weight:1000;text-align:right;">— Ton amoureux</p>
-              </article>
-            </div>
+        <!-- ENVELOPPE à droite -->
+        <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
+          <div class="env-body">
+            <div class="env-bottom"></div>
           </div>
+          <div class="flap"></div>
+
+          <div class="seal"><span>❤</span></div>
+
+          <article class="letter" id="letter" aria-live="polite">
+            <p>
+              Coucou Hemen mon amour 💖<br><br>
+              J’avais envie de te dire quelque chose de simple mais sincère…<br>
+              Avec toi, tout est plus doux.<br><br>
+              Est-ce que tu veux être ma Valentine ? ✨
+            </p>
+
+            <div class="actions">
+              <button class="yes" id="yesBtn">Oui 💘</button>
+              <button class="think" id="thinkBtn">Je dois réfléchir 🤔</button>
+            </div>
+
+            <p style="margin-top:10px;font-weight:1000;text-align:right;">— Ton amoureux</p>
+          </article>
         </div>
       </div>
 
@@ -486,12 +427,6 @@
   <div class="fw" id="fw"></div>
 
   <script>
-    // Rectangles rouges ON/OFF
-    const DEBUG_ZONES = true;
-    if(!DEBUG_ZONES){
-      document.querySelectorAll('.photo-zone,.envelope-zone').forEach(el=> el.style.outline = 'none');
-    }
-
     const envelope = document.getElementById("envelope");
     const result = document.getElementById("result");
     const yesBtn = document.getElementById("yesBtn");
@@ -499,7 +434,6 @@
     const overlay = document.getElementById("overlay");
     const fw = document.getElementById("fw");
     const song = document.getElementById("song");
-    const audioTip = document.getElementById("audioTip");
     const ambient = document.getElementById("ambient");
     const slidesEl = document.getElementById("slides");
 
@@ -512,25 +446,22 @@
       const h = document.createElement("div");
       h.className = "aheart";
       h.textContent = heartEmojis[Math.floor(Math.random()*heartEmojis.length)];
-
       const left = Math.random() * 100;
       const size = 14 + Math.random() * 14;
       const drift = (Math.random() * 140 - 70) + "px";
       const dur = 4.8 + Math.random() * 4.2;
-
       h.style.left = left + "%";
       h.style.fontSize = size + "px";
       h.style.setProperty("--drift", drift);
       h.style.animationDuration = dur + "s";
       h.style.animationDelay = (Math.random()*0.9) + "s";
-
       ambient.appendChild(h);
       setTimeout(() => h.remove(), (dur + 1) * 1000);
     }
     setInterval(spawnAmbient, 420);
     for(let i=0;i<12;i++) spawnAmbient();
 
-    // Slider photo
+    // Slider
     const imgs = Array.from(slidesEl.querySelectorAll("img"));
     let idx = 0;
     function nextSlide(){
@@ -540,45 +471,33 @@
     }
     setInterval(nextSlide, 3200);
 
-    // Audio : tentative autoplay + fallback
+    // Audio : essaye au chargement, sinon au 1er clic
     async function tryAutoPlay(){
       try{
         song.volume = 0.85;
-        await song.play();        // tente de démarrer direct
+        await song.play();
         audioUnlocked = true;
-        audioTip.classList.remove("show");
-      }catch(e){
-        // Bloqué par le navigateur → on affiche un tip
-        audioTip.classList.add("show");
-      }
+      }catch(e){}
     }
     tryAutoPlay();
 
     function unlockAudio(){
       if(audioUnlocked) return;
       song.volume = 0.85;
-      song.play().then(()=>{
-        audioUnlocked = true;
-        audioTip.classList.remove("show");
-      }).catch(()=>{});
+      song.play().then(()=> audioUnlocked = true).catch(()=>{});
     }
-
-    // Dès le premier clic/tap sur la page : on force la musique
-    window.addEventListener("pointerdown", unlockAudio, { once: true });
 
     function openEnvelope(){
       isOpen = true;
-      envelope.classList.add("open");  // ✅ important
+      envelope.classList.add("open");   // ✅ indispensable
       result.textContent = "";
       unlockAudio();
     }
-
     function closeEnvelope(){
       isOpen = false;
       envelope.classList.remove("open");
       result.textContent = "";
     }
-
     function toggleOpen(){
       if(isOpen) closeEnvelope();
       else openEnvelope();
@@ -592,7 +511,6 @@
       if (e.key === "Enter" || e.key === " ") toggleOpen();
     });
 
-    // Fireworks hearts
     function burstAt(x, y, count=18){
       for(let i=0;i<count;i++){
         const p = document.createElement("div");
@@ -600,19 +518,16 @@
         p.textContent = ["💖","💘","💝","💕","✨","❤️","🌟"][Math.floor(Math.random()*7)];
         p.style.left = x + "px";
         p.style.top = y + "px";
-
         const angle = Math.random() * Math.PI * 2;
         const dist = 90 + Math.random() * 200;
         const dx = Math.cos(angle) * dist;
         const dy = Math.sin(angle) * dist;
-
         p.style.setProperty("--x", dx + "px");
         p.style.setProperty("--y", dy + "px");
         fw.appendChild(p);
         setTimeout(() => p.remove(), 1750);
       }
     }
-
     function heartFireworks(durationMs=3600){
       const start = Date.now();
       const tick = () => {
@@ -641,13 +556,15 @@
       overlay.setAttribute("aria-hidden","false");
     });
 
-    // Message "tu t'es trompée"
     thinkBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       openEnvelope(); // reste ouvert
       result.textContent = "Réessaie… tu t’es trompée 😇💗";
       doShake();
     });
+
+    // 1er clic n’importe où débloque l’audio si besoin
+    window.addEventListener("pointerdown", unlockAudio, { once: true });
   </script>
 </body>
 </html>
