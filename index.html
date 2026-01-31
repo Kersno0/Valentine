@@ -126,14 +126,13 @@
 
     /* Zone enveloppe (taille du rectangle rouge de droite) */
     .env-zone{
-      width: 820px;
-      height: 480px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      flex: 1;
-      /* pas de bordure visible */
-    }
+  width: 820px;
+  height: 480px;
+  display:flex;
+  justify-content:center;   /* centre horizontalement */
+  align-items:center;       /* centre verticalement */
+  flex: 1;
+}
 
     /* ===== PHOTO ===== */
     .frame{
@@ -160,15 +159,18 @@
 
     /* ===== ENVELOPPE ===== */
     .envelope{
-      width: 760px;     /* plus gros */
-      height: 450px;
-      position:relative;
-      cursor:pointer;
-      user-select:none;
-      transform: translateY(6px);
-      transition: transform .25s ease;
-    }
-    .envelope:hover{ transform: translateY(0px) scale(1.01); }
+  width: 760px;              /* taille correcte */
+  height: 450px;
+  position:relative;
+  cursor:pointer;
+  user-select:none;
+  transform: translateY(6px); /* léger flottement */
+  transition: transform .25s ease;
+  margin: 0 auto;            /* sécurité centrage */
+}
+.envelope:hover{
+  transform: translateY(0px) scale(1.01);
+}
 
     .env-body{
       position:absolute;
