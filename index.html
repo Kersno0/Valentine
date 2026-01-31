@@ -100,7 +100,7 @@
       align-items:center;
       justify-content:space-between;
       gap:56px;
-      padding: 8px 18px;   /* évite collé aux bords */
+      padding: 8px 18px;
       position:relative;
       z-index:1;
     }
@@ -113,9 +113,8 @@
       }
     }
 
-    /* ======= ZONES (rectangles rouges repères) ======= */
-    /* Si tu veux enlever les rectangles rouges :
-       mets DEBUG_ZONES = false (voir plus bas) ou supprime outline */
+    /* ======= ZONES (rectangles rouges) ======= */
+    /* Mets DEBUG_ZONES = false dans le JS pour les enlever */
     .photo-zone{
       width: 340px;
       height: 420px;
@@ -139,7 +138,7 @@
       border-radius: 16px;
     }
 
-    /* ===== PHOTO (un peu plus grande) ===== */
+    /* ===== PHOTO ===== */
     .frame{
       width: 270px;
       aspect-ratio: 4/5;
@@ -214,37 +213,41 @@
       border-top-right-radius:18px;
       filter: drop-shadow(0 6px 10px rgba(0,0,0,.10));
     }
-   .seal{
-  position:absolute;
-  left:50%;
-  top:54%;
-  transform: translate(-50%,-50%);
-  width: 86px;
-  height: 86px;
-  border-radius: 50%;
-  background:
-    radial-gradient(circle at 30% 30%, #fff 0%, rgba(255,255,255,.22) 22%, transparent 25%),
-    linear-gradient(135deg, var(--red), var(--red2));
-  box-shadow: 0 12px 26px rgba(255,31,90,.34);
-  display:grid;
-  place-items:center;
-  z-index: 6;
-  border: 2px solid rgba(255,255,255,.55);
-  transition: opacity .3s ease, transform .3s ease;
-}
 
-.seal span{
-  font-size: 34px;
-  filter: drop-shadow(0 2px 2px rgba(0,0,0,.14));
-}
+    /* ===== SCEAU (bouton coeur) ===== */
+    .seal{
+      position:absolute;
+      left:50%;
+      top:54%;
+      transform: translate(-50%,-50%);
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at 30% 30%, #fff 0%, rgba(255,255,255,.22) 22%, transparent 25%),
+        linear-gradient(135deg, var(--red), var(--red2));
+      box-shadow: 0 12px 26px rgba(255,31,90,.34);
+      display:grid;
+      place-items:center;
+      z-index: 6;
+      border: 2px solid rgba(255,255,255,.55);
+      transition: opacity .25s ease, transform .25s ease, visibility .25s ease;
+    }
+    .seal span{
+      font-size: 34px;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.14));
+    }
 
-/* ✅ Quand l'enveloppe est ouverte → le sceau disparaît */
-.open .seal{
-  opacity: 0;
-  pointer-events: none;
-  transform: translate(-50%,-50%) scale(0.85);
-}
-
+    /* ✅ Cache le sceau QUAND OUVERT (3 sécurités) */
+    .envelope.open .seal,
+    #envelope.open .seal,
+    .open .seal{
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transform: translate(-50%,-50%) scale(0.85);
+      z-index: -1;
+    }
 
     /* Lettre */
     .letter{
@@ -258,7 +261,7 @@
       border: 2px solid rgba(0,0,0,.06);
       box-shadow: 0 18px 40px rgba(0,0,0,.12);
       padding: 18px 18px 16px;
-      z-index: 4;
+      z-index: 10; /* ✅ au-dessus de tout */
       opacity: 0;
       transform: translateX(-50%) translateY(62px);
       transition: transform .9s cubic-bezier(.2,.9,.2,1), opacity .4s ease;
@@ -304,15 +307,13 @@
     }
 
     /* petit shake taquin */
-    .shake{
-      animation: shake .35s ease;
-    }
+    .shake{ animation: shake .35s ease; }
     @keyframes shake{
-      0%{ transform: translateY(0) rotate(0deg); }
-      25%{ transform: translateY(0) rotate(-1deg); }
-      50%{ transform: translateY(0) rotate(1deg); }
-      75%{ transform: translateY(0) rotate(-.8deg); }
-      100%{ transform: translateY(0) rotate(0deg); }
+      0%{ transform: translateY(6px) rotate(0deg); }
+      25%{ transform: translateY(6px) rotate(-1deg); }
+      50%{ transform: translateY(6px) rotate(1deg); }
+      75%{ transform: translateY(6px) rotate(-.8deg); }
+      100%{ transform: translateY(6px) rotate(0deg); }
     }
 
     .result{
@@ -387,16 +388,26 @@
       100%{ transform: translate(var(--x), var(--y)) scale(1.25); opacity:0; }
     }
 
-    /* Mobile */
+    /* Petit bandeau si autoplay bloqué */
+    .audio-tip{
+      position: fixed;
+      top: 12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,.85);
+      border: 1px solid rgba(0,0,0,.06);
+      box-shadow: 0 10px 30px rgba(0,0,0,.10);
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-weight: 800;
+      z-index: 99;
+      display:none;
+    }
+    .audio-tip.show{ display:block; }
+
     @media (max-width: 520px){
-      .photo-zone{
-        width: 320px;
-        height: 360px;
-      }
-      .envelope-zone{
-        width: 320px;
-        height: 380px;
-      }
+      .photo-zone{ width: 320px; height: 360px; }
+      .envelope-zone{ width: 320px; height: 380px; }
       .frame{ width: 240px; }
       .envelope{ width: 430px; height: 285px; }
       .letter{ width: 320px; height: 300px; }
@@ -405,8 +416,10 @@
 </head>
 
 <body>
-  <!-- Musique -->
-  <audio id="song" preload="auto">
+  <div class="audio-tip" id="audioTip">🔊 Clique pour activer la musique</div>
+
+  <!-- Musique : on tente autoplay -->
+  <audio id="song" preload="auto" autoplay loop>
     <source src="song.mp3" type="audio/mpeg">
   </audio>
 
@@ -418,7 +431,6 @@
       <div class="ambient" id="ambient"></div>
 
       <div class="row">
-        <!-- ZONE PHOTO (rectangle rouge gauche) -->
         <div class="photo-zone">
           <div class="frame">
             <div class="slides" id="slides">
@@ -429,7 +441,6 @@
           </div>
         </div>
 
-        <!-- ZONE ENVELOPPE (rectangle rouge droit) -->
         <div class="envelope-zone">
           <div class="envelope-area">
             <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
@@ -437,6 +448,8 @@
                 <div class="env-bottom"></div>
               </div>
               <div class="flap"></div>
+
+              <!-- Sceau -->
               <div class="seal"><span>❤</span></div>
 
               <article class="letter" id="letter" aria-live="polite">
@@ -463,7 +476,6 @@
     </section>
   </main>
 
-  <!-- Overlay final -->
   <div class="overlay" id="overlay" aria-hidden="true">
     <div class="final-card">
       <div class="big-heart">❤️</div>
@@ -471,17 +483,13 @@
     </div>
   </div>
 
-  <!-- Fireworks -->
   <div class="fw" id="fw"></div>
 
   <script>
-    // ====== DEBUG ZONES ON/OFF ======
-    // Mets false pour enlever les rectangles rouges sans toucher au CSS
+    // Rectangles rouges ON/OFF
     const DEBUG_ZONES = true;
     if(!DEBUG_ZONES){
-      document.querySelectorAll('.photo-zone,.envelope-zone').forEach(el=>{
-        el.style.outline = 'none';
-      });
+      document.querySelectorAll('.photo-zone,.envelope-zone').forEach(el=> el.style.outline = 'none');
     }
 
     const envelope = document.getElementById("envelope");
@@ -491,11 +499,12 @@
     const overlay = document.getElementById("overlay");
     const fw = document.getElementById("fw");
     const song = document.getElementById("song");
+    const audioTip = document.getElementById("audioTip");
     const ambient = document.getElementById("ambient");
     const slidesEl = document.getElementById("slides");
 
     let isOpen = false;
-    let startedMusic = false;
+    let audioUnlocked = false;
 
     // Coeurs en continu
     const heartEmojis = ["💖","💘","💗","💝","💕","✨","🌟"];
@@ -521,7 +530,7 @@
     setInterval(spawnAmbient, 420);
     for(let i=0;i<12;i++) spawnAmbient();
 
-    // Slider
+    // Slider photo
     const imgs = Array.from(slidesEl.querySelectorAll("img"));
     let idx = 0;
     function nextSlide(){
@@ -531,19 +540,37 @@
     }
     setInterval(nextSlide, 3200);
 
-    function startMusicIfNeeded(){
-      if (!startedMusic){
-        startedMusic = true;
-        song.volume = 0.75;
-        song.play().catch(()=>{});
+    // Audio : tentative autoplay + fallback
+    async function tryAutoPlay(){
+      try{
+        song.volume = 0.85;
+        await song.play();        // tente de démarrer direct
+        audioUnlocked = true;
+        audioTip.classList.remove("show");
+      }catch(e){
+        // Bloqué par le navigateur → on affiche un tip
+        audioTip.classList.add("show");
       }
     }
+    tryAutoPlay();
+
+    function unlockAudio(){
+      if(audioUnlocked) return;
+      song.volume = 0.85;
+      song.play().then(()=>{
+        audioUnlocked = true;
+        audioTip.classList.remove("show");
+      }).catch(()=>{});
+    }
+
+    // Dès le premier clic/tap sur la page : on force la musique
+    window.addEventListener("pointerdown", unlockAudio, { once: true });
 
     function openEnvelope(){
       isOpen = true;
-      envelope.classList.add("open");
+      envelope.classList.add("open");  // ✅ important
       result.textContent = "";
-      startMusicIfNeeded();
+      unlockAudio();
     }
 
     function closeEnvelope(){
@@ -557,7 +584,6 @@
       else openEnvelope();
     }
 
-    // Click enveloppe
     envelope.addEventListener("click", (e) => {
       if (e.target.tagName.toLowerCase() === "button") return;
       toggleOpen();
@@ -582,12 +608,11 @@
 
         p.style.setProperty("--x", dx + "px");
         p.style.setProperty("--y", dy + "px");
-        p.style.animationDelay = (Math.random()*0.10) + "s";
-
         fw.appendChild(p);
         setTimeout(() => p.remove(), 1750);
       }
     }
+
     function heartFireworks(durationMs=3600){
       const start = Date.now();
       const tick = () => {
@@ -607,30 +632,22 @@
       envelope.classList.add("shake");
     }
 
-    // OUI
     yesBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       openEnvelope();
       result.textContent = "OUIIIII 💞";
-      startMusicIfNeeded();
       heartFireworks(3600);
       overlay.classList.add("show");
       overlay.setAttribute("aria-hidden","false");
     });
 
-    // JE DOIS RÉFLÉCHIR -> message + lettre ouverte + taquin
+    // Message "tu t'es trompée"
     thinkBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       openEnvelope(); // reste ouvert
       result.textContent = "Réessaie… tu t’es trompée 😇💗";
       doShake();
-      burstAt(window.innerWidth*0.62, window.innerHeight*0.35, 14);
     });
-
-    // Assure le démarrage audio après interaction (navigateurs)
-    document.addEventListener("click", () => {
-      if (startedMusic) song.play().catch(()=>{});
-    }, { once: true });
   </script>
 </body>
 </html>
