@@ -344,6 +344,15 @@
       font-weight: 1100;
       letter-spacing:-0.02em;
     }
+
+    /* ✅ AJOUT : style du texte en dessous */
+    .final-sub{
+      margin-top: 8px;
+      font-size: clamp(16px, 2.2vw, 22px);
+      font-weight: 900;
+      opacity: .92;
+    }
+
     .big-heart{
       font-size: 58px;
       filter: drop-shadow(0 16px 30px rgba(255,31,90,.22));
@@ -446,7 +455,7 @@
     <div class="final-card">
       <div class="big-heart">❤️</div>
       <div class="final-title">Je t’aime Hemen, pour toujours ✨</div>
-<div class="final-sub">Rendez-vous le 13 pour la nuit de folie 😉✨</div>
+      <div class="final-sub">Rendez-vous le 13 pour la nuit de folie 😉✨</div>
     </div>
   </div>
 
@@ -569,6 +578,7 @@
         setTimeout(() => p.remove(), 1750);
       }
     }
+
     function heartFireworks(durationMs=3600){
       const start = Date.now();
       const tick = () => {
