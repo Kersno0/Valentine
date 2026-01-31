@@ -344,15 +344,6 @@
       font-weight: 1100;
       letter-spacing:-0.02em;
     }
-
-    /* ✅ AJOUT : style du texte sous le titre */
-    .final-sub{
-      margin-top: 6px;
-      font-size: clamp(16px, 2.1vw, 20px);
-      font-weight: 900;
-      opacity: .9;
-    }
-
     .big-heart{
       font-size: 58px;
       filter: drop-shadow(0 16px 30px rgba(255,31,90,.22));
@@ -455,9 +446,6 @@
     <div class="final-card">
       <div class="big-heart">❤️</div>
       <div class="final-title">Je t’aime Hemen, pour toujours ✨</div>
-
-      <!-- ✅ AJOUT : texte sous le titre -->
-      <div class="final-sub">Rendez-vous le 13 pour la nuit de folie 😉✨</div>
     </div>
   </div>
 
@@ -528,6 +516,7 @@
     function openEnvelope(){
       isOpen = true;
       envelope.classList.add("open");
+      // ✅ plan B : même si le CSS rate, on cache direct le sceau
       if(seal){
         seal.style.opacity = "0";
         seal.style.visibility = "hidden";
@@ -540,6 +529,7 @@
     function closeEnvelope(){
       isOpen = false;
       envelope.classList.remove("open");
+      // ré-affiche le sceau
       if(seal){
         seal.style.opacity = "";
         seal.style.visibility = "";
