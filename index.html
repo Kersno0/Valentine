@@ -96,10 +96,11 @@
 
     /* ======= LAYOUT (reprend tes rectangles rouges mais invisibles) ======= */
     .row{
-  display:flex;
+  display:grid;
+  grid-template-columns: 340px 820px; /* photo-zone | env-zone */
   align-items:center;
-  justify-content:space-between;
-  gap:50px;
+  justify-content:center;            /* ✅ centre les 2 colonnes ensemble */
+  column-gap: 70px;                  /* espace entre photo et enveloppe */
   padding: 10px 24px;
   position:relative;
   z-index:1;
@@ -115,25 +116,23 @@
 
     /* Zone photo (taille du rectangle rouge de gauche) */
     .photo-zone{
-      width: 340px;
-      height: 420px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      flex: 0 0 auto;
-      /* pas de bordure visible */
-    }
-
-    /* Zone enveloppe (taille du rectangle rouge de droite) */
-    .env-zone{
-  width: 760px;          /* avant 820px -> moins large */
-  height: 480px;
+  width: 340px;
+  height: 420px;
   display:flex;
   justify-content:center;
   align-items:center;
-  flex: 1;
-  margin-right: 70px;    /* ✅ ramène l'enveloppe vers le centre */
 }
+
+
+    /* Zone enveloppe (taille du rectangle rouge de droite) */
+    .env-zone{
+  width: 820px;
+  height: 480px;
+  display:flex;
+  justify-content:center;  /* enveloppe centrée dans sa colonne */
+  align-items:center;
+}
+
 
 
     /* ===== PHOTO ===== */
