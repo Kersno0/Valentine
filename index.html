@@ -18,7 +18,10 @@
       --card: rgba(255,255,255,.72);
       --shadow: 0 18px 60px rgba(0,0,0,.14);
 
+      /* ✅ RÉGLAGE PRINCIPAL DESKTOP : écart photo <-> enveloppe */
       --gap: 28px;
+
+      /* ✅ RÉGLAGE MOBILE : réduit l’écart vertical (photo au-dessus, enveloppe en dessous) */
       --gapMobile: 12px;
     }
 
@@ -33,9 +36,11 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--ink);
 
-      overflow-x:hidden;
-      overflow-y:auto;
+      /* ✅ FIX SCROLL iPhone */
+      overflow-x: hidden;
+      overflow-y: auto;
       -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
 
       background:
         radial-gradient(1000px 450px at 15% 20%, rgba(255,255,255,.85) 0%, transparent 60%),
@@ -85,7 +90,8 @@
     .ambient{
       position:absolute;
       inset:0;
-      pointer-events:none;
+      pointer-events:none;   /* ✅ ne bloque pas le scroll */
+      touch-action: pan-y;
       z-index:0;
       overflow:hidden;
     }
@@ -102,7 +108,7 @@
       100%{ transform: translateY(-820px) translateX(var(--drift)) scale(1.35); opacity:0; }
     }
 
-    /* ======= LAYOUT ======= */
+    /* ======= LAYOUT DESKTOP ======= */
     .row{
       display:flex;
       align-items:center;
@@ -114,6 +120,7 @@
       z-index:1;
     }
 
+    /* photo fixe, ne bouge pas */
     .photo-zone{
       flex: 0 0 340px;
       height: 420px;
@@ -122,6 +129,7 @@
       align-items:center;
     }
 
+    /* enveloppe prend la place, sans agrandir au-delà de 760 */
     .env-zone{
       flex: 0 1 760px;
       min-width: 0;
@@ -154,7 +162,7 @@
     }
     .slides img.active{ opacity:1; }
 
-    /* ===== ENVELOPPE ===== */
+    /* ===== ENVELOPPE (PAS DE BOUGE AU HOVER) ===== */
     .envelope{
       width: 100%;
       max-width: 760px;
@@ -162,21 +170,15 @@
       height: auto;
 
       position:relative;
-      user-select:none;
-      transform:none;
-    }
-
-    /* ✅ couche tactile ultra fiable */
-    .tap-layer{
-      position:absolute;
-      inset:0;
-      z-index:50;
-      border:0;
-      background:transparent;
-      padding:0;
       cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+      user-select:none;
+
+      transform:none;
+      transition: filter .25s ease;
+    }
+    .envelope:hover{
+      transform:none;
+      filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
     }
 
     .env-body{
@@ -212,6 +214,7 @@
       filter: drop-shadow(0 6px 10px rgba(0,0,0,.10));
     }
 
+    /* Sceau */
     .seal{
       position:absolute;
       left:50%;
@@ -235,6 +238,16 @@
       filter: drop-shadow(0 2px 2px rgba(0,0,0,.14));
     }
 
+    /* On cache le sceau quand ouvert */
+    .open .seal,
+    .envelope.open .seal,
+    #envelope.open .seal{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transform: translate(-50%,-50%) scale(.85);
+    }
+
     /* Lettre */
     .letter{
       position:absolute;
@@ -251,7 +264,6 @@
       opacity: 0;
       transform: translateX(-50%) translateY(62px);
       transition: transform .9s cubic-bezier(.2,.9,.2,1), opacity .4s ease;
-      pointer-events:none;
     }
     .letter p{
       margin:0;
@@ -266,7 +278,7 @@
       justify-content:center;
       margin-top: 14px;
     }
-    button.action{
+    button{
       border:0;
       padding:12px 15px;
       border-radius: 14px;
@@ -274,7 +286,6 @@
       cursor:pointer;
       transition: transform .12s ease, box-shadow .2s ease;
       box-shadow: 0 10px 24px rgba(0,0,0,.10);
-      touch-action: manipulation;
     }
     .yes{
       background: linear-gradient(135deg, var(--red), var(--red2));
@@ -285,19 +296,13 @@
       color:#3b1a22;
       border:2px solid rgba(255,31,90,.14);
     }
+    button:hover{ transform: translateY(-1px); }
+    button:active{ transform: translateY(1px) scale(.99); }
 
     .open .flap{ transform: rotateX(160deg); }
     .open .letter{
       opacity: 1;
       transform: translateX(-50%) translateY(-38px);
-      pointer-events:auto;
-    }
-
-    .open .seal{
-      opacity:0;
-      visibility:hidden;
-      pointer-events:none;
-      transform: translate(-50%,-50%) scale(.85);
     }
 
     .shake{ animation: shake .35s ease; }
@@ -331,8 +336,14 @@
       backdrop-filter: blur(8px);
       z-index:50;
       padding: 20px;
+
+      pointer-events:none; /* ✅ ne bloque pas le scroll */
+      touch-action: pan-y;
     }
-    .overlay.show{ display:grid; }
+    .overlay.show{
+      display:grid;
+      pointer-events:auto; /* ✅ cliquable seulement quand visible */
+    }
     .final-card{
       width:min(720px, 92vw);
       background: rgba(255,255,255,.78);
@@ -366,10 +377,12 @@
       50%{ transform: scale(1.12); }
     }
 
+    /* Fireworks hearts */
     .fw{
       position:fixed;
       inset:0;
-      pointer-events:none;
+      pointer-events:none; /* ✅ ne bloque pas le scroll */
+      touch-action: pan-y;
       z-index:60;
       overflow:hidden;
     }
@@ -386,29 +399,46 @@
       100%{ transform: translate(var(--x), var(--y)) scale(1.25); opacity:0; }
     }
 
-    /* ===== MOBILE ===== */
+    /* ======= MOBILE : enveloppe visible + moins d’écart + pas de vide ======= */
     @media (max-width: 920px){
       .row{
         flex-direction: column;
-        gap: var(--gapMobile);
+        align-items: center;
+        justify-content: center;
+        gap: var(--gapMobile); /* ✅ réduit l’écart */
         padding: 10px 12px;
       }
+
+      /* ✅ supprime les hauteurs fixes qui créaient du vide énorme */
       .photo-zone, .env-zone{
-        width:100%;
-        height:auto;
+        width: 100%;
+        height: auto;
       }
-      .frame{ width: min(320px, 88vw); }
-      .envelope{ width: min(430px, 92vw); }
+
+      .frame{
+        width: min(320px, 88vw);
+      }
+
+      .envelope{
+        width: min(430px, 92vw);
+        height: auto;
+        aspect-ratio: 760 / 450;
+      }
+
       .letter{
         width: min(320px, 88vw);
-        height:auto;
+        height: auto;
       }
+    }
+
+    @media (max-width: 520px){
+      .frame{ width: min(300px, 88vw); }
     }
   </style>
 </head>
 
 <body>
-  <audio id="song" preload="auto" loop>
+  <audio id="song" preload="auto" autoplay loop>
     <source src="song.mp3" type="audio/mpeg">
   </audio>
 
@@ -432,10 +462,6 @@
 
         <div class="env-zone">
           <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
-
-            <!-- ✅ bouton invisible qui capte TOUS les clics / taps -->
-            <button id="tapEnvelope" class="tap-layer" type="button" aria-label="Ouvrir l'enveloppe"></button>
-
             <div class="env-body">
               <div class="env-bottom"></div>
             </div>
@@ -452,8 +478,8 @@
               </p>
 
               <div class="actions">
-                <button class="action yes" id="yesBtn" type="button">Oui 💘</button>
-                <button class="action think" id="thinkBtn" type="button">Je dois réfléchir 🤔</button>
+                <button class="yes" id="yesBtn">Oui 💘</button>
+                <button class="think" id="thinkBtn">Je dois réfléchir 🤔</button>
               </div>
 
               <p style="margin-top:10px;font-weight:1000;text-align:right;">— Ton amoureux</p>
@@ -478,7 +504,6 @@
 
   <script>
     const envelope = document.getElementById("envelope");
-    const tapEnvelope = document.getElementById("tapEnvelope");
     const seal = document.getElementById("seal");
     const result = document.getElementById("result");
     const yesBtn = document.getElementById("yesBtn");
@@ -516,19 +541,27 @@
     // Slider
     const imgs = Array.from(slidesEl.querySelectorAll("img"));
     let idx = 0;
-    setInterval(() => {
+    function nextSlide(){
       imgs[idx].classList.remove("active");
       idx = (idx + 1) % imgs.length;
       imgs[idx].classList.add("active");
-    }, 3200);
+    }
+    setInterval(nextSlide, 3200);
 
-    async function unlockAudio(){
-      if(audioUnlocked) return;
+    // Audio : autoplay + fallback clic
+    async function tryAutoPlay(){
       try{
         song.volume = 0.85;
         await song.play();
         audioUnlocked = true;
       }catch(e){}
+    }
+    tryAutoPlay();
+
+    function unlockAudio(){
+      if(audioUnlocked) return;
+      song.volume = 0.85;
+      song.play().then(()=> audioUnlocked = true).catch(()=>{});
     }
 
     function openEnvelope(){
@@ -559,17 +592,12 @@
       else openEnvelope();
     }
 
-    // ✅ On utilise UNIQUEMENT le bouton invisible (fiable PC + mobile)
-    tapEnvelope.addEventListener("click", () => {
+    envelope.addEventListener("click", (e) => {
+      if (e.target.tagName.toLowerCase() === "button") return;
       toggleOpen();
     });
-
-    // clavier
     envelope.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        toggleOpen();
-      }
+      if (e.key === "Enter" || e.key === " ") toggleOpen();
     });
 
     function burstAt(x, y, count=18){
@@ -581,8 +609,10 @@
         p.style.top = y + "px";
         const angle = Math.random() * Math.PI * 2;
         const dist = 90 + Math.random() * 200;
-        p.style.setProperty("--x", (Math.cos(angle)*dist) + "px");
-        p.style.setProperty("--y", (Math.sin(angle)*dist) + "px");
+        const dx = Math.cos(angle) * dist;
+        const dy = Math.sin(angle) * dist;
+        p.style.setProperty("--x", dx + "px");
+        p.style.setProperty("--y", dy + "px");
         fw.appendChild(p);
         setTimeout(() => p.remove(), 1750);
       }
@@ -590,8 +620,12 @@
     function heartFireworks(durationMs=3600){
       const start = Date.now();
       const tick = () => {
-        burstAt(Math.random()innerWidth, 80 + Math.random()(innerHeight*0.55), 18);
-        if (Date.now() - start < durationMs) setTimeout(tick, 420);
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        burstAt(Math.random()*w, 80 + Math.random()*(h*0.55), 18);
+        if (Date.now() - start < durationMs){
+          setTimeout(tick, 420);
+        }
       };
       tick();
     }
@@ -618,9 +652,7 @@
       doShake();
     });
 
-    // déverrouille musique dès le 1er geste
-    window.addEventListener("pointerdown", unlockAudio, { once:true });
-    window.addEventListener("touchstart", unlockAudio, { once:true, passive:true });
+    window.addEventListener("pointerdown", unlockAudio, { once: true });
   </script>
 </body>
 </html>
