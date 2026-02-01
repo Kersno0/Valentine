@@ -18,16 +18,11 @@
       --card: rgba(255,255,255,.72);
       --shadow: 0 18px 60px rgba(0,0,0,.14);
 
-      /* ✅ RÉGLAGE PRINCIPAL DESKTOP : écart photo <-> enveloppe */
-      --gap: 28px;
-
-      /* ✅ RÉGLAGE MOBILE : réduit l’écart vertical (photo au-dessus, enveloppe en dessous) */
-      --gapMobile: 12px;
+      /* ✅ SEUL RÉGLAGE À TOUCHER POUR RAPPROCHER PHOTO <-> ENVELOPPE */
+      --gap: 28px; /* essaie 18px / 24px / 32px */
     }
 
     *{ box-sizing:border-box; }
-    html, body{ height:100%; }
-
     body{
       margin:0;
       min-height:100vh;
@@ -35,12 +30,9 @@
       place-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--ink);
+      overflow-x: hidden;   /* on garde pas de scroll horizontal */
+      overflow-y: auto;     /* ✅ autorise le scroll vertical => l’enveloppe apparaît */
 
-      /* ✅ FIX SCROLL iPhone */
-      overflow-x: hidden;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
 
       background:
         radial-gradient(1000px 450px at 15% 20%, rgba(255,255,255,.85) 0%, transparent 60%),
@@ -90,8 +82,7 @@
     .ambient{
       position:absolute;
       inset:0;
-      pointer-events:none;   /* ✅ ne bloque pas le scroll */
-      touch-action: pan-y;
+      pointer-events:none;
       z-index:0;
       overflow:hidden;
     }
@@ -108,36 +99,78 @@
       100%{ transform: translateY(-820px) translateX(var(--drift)) scale(1.35); opacity:0; }
     }
 
-    /* ======= LAYOUT DESKTOP ======= */
-    .row{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap: var(--gap);
-      padding: 10px 24px;
-      width:100%;
-      position:relative;
-      z-index:1;
-    }
+   /* ======= LAYOUT (FIX: plus de rognage à gauche) ======= */
+.row{
+  display:flex;
+  align-items:center;
+  justify-content:center;   /* ✅ centre le groupe photo+enveloppe */
+  gap: var(--gap);
+  padding: 10px 24px;
+  width:100%;
+  position:relative;
+  z-index:1;
+}
 
-    /* photo fixe, ne bouge pas */
-    .photo-zone{
-      flex: 0 0 340px;
-      height: 420px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
+/* photo fixe, ne bouge pas */
+.photo-zone{
+  flex: 0 0 340px;             /* fixe */
+  height: 420px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-    /* enveloppe prend la place, sans agrandir au-delà de 760 */
-    .env-zone{
-      flex: 0 1 760px;
-      min-width: 0;
-      height: 480px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
+/* enveloppe flexible : elle prend la place restante */
+.env-zone{
+  flex: 0 1 760px;          /* ✅ base 760px, peut rétrécir, NE GRANDIT PAS */
+  min-width: 0;
+  height: 480px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
+/* enveloppe responsive : se rétrécit si besoin */
+.envelope{
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 760 / 450;
+  height: auto;
+
+  position:relative;
+  cursor:pointer;
+  user-select:none;
+
+  transform:none;
+  transition: filter .25s ease;
+}
+.envelope:hover{
+  transform:none;
+  filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
+}
+
+
+/* Mobile */
+@media (max-width: 920px){
+  .row{
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+  }
+
+  .env-zone{
+    width: 100%;
+    height: auto;        /* ✅ pas de hauteur fixe */
+  }
+
+  .envelope{
+    width: min(430px, 92vw);
+    height: auto;
+    aspect-ratio: 760 / 450; /* ✅ garde la forme */
+  }
+}
+
 
     /* ===== PHOTO ===== */
     .frame{
@@ -162,7 +195,7 @@
     }
     .slides img.active{ opacity:1; }
 
-    /* ===== ENVELOPPE (PAS DE BOUGE AU HOVER) ===== */
+    /* ===== ENVELOPPE (RESPONSIVE + PAS DE BOUGE) ===== */
     .envelope{
       width: 100%;
       max-width: 760px;
@@ -173,11 +206,13 @@
       cursor:pointer;
       user-select:none;
 
+      /* ✅ pas de mouvement */
       transform:none;
       transition: filter .25s ease;
     }
+
     .envelope:hover{
-      transform:none;
+      transform:none; /* ✅ ne bouge pas */
       filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
     }
 
@@ -336,14 +371,8 @@
       backdrop-filter: blur(8px);
       z-index:50;
       padding: 20px;
-
-      pointer-events:none; /* ✅ ne bloque pas le scroll */
-      touch-action: pan-y;
     }
-    .overlay.show{
-      display:grid;
-      pointer-events:auto; /* ✅ cliquable seulement quand visible */
-    }
+    .overlay.show{ display:grid; }
     .final-card{
       width:min(720px, 92vw);
       background: rgba(255,255,255,.78);
@@ -381,8 +410,7 @@
     .fw{
       position:fixed;
       inset:0;
-      pointer-events:none; /* ✅ ne bloque pas le scroll */
-      touch-action: pan-y;
+      pointer-events:none;
       z-index:60;
       overflow:hidden;
     }
@@ -399,40 +427,11 @@
       100%{ transform: translate(var(--x), var(--y)) scale(1.25); opacity:0; }
     }
 
-    /* ======= MOBILE : enveloppe visible + moins d’écart + pas de vide ======= */
-    @media (max-width: 920px){
-      .row{
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: var(--gapMobile); /* ✅ réduit l’écart */
-        padding: 10px 12px;
-      }
-
-      /* ✅ supprime les hauteurs fixes qui créaient du vide énorme */
-      .photo-zone, .env-zone{
-        width: 100%;
-        height: auto;
-      }
-
-      .frame{
-        width: min(320px, 88vw);
-      }
-
-      .envelope{
-        width: min(430px, 92vw);
-        height: auto;
-        aspect-ratio: 760 / 450;
-      }
-
-      .letter{
-        width: min(320px, 88vw);
-        height: auto;
-      }
-    }
-
     @media (max-width: 520px){
-      .frame{ width: min(300px, 88vw); }
+      .photo-zone{ width: 320px; height: 380px; }
+      .frame{ width: 250px; }
+      .letter{ width: 320px; height: 300px; }
+      .env-zone{ height:auto; }
     }
   </style>
 </head>
