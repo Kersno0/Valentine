@@ -18,9 +18,8 @@
       --card: rgba(255,255,255,.72);
       --shadow: 0 18px 60px rgba(0,0,0,.14);
 
-      /* ✅ Réglages simples */
-      --envX: 0px;      /* ✅ enveloppe : NE BOUGE PAS (laisse à 0) */
-      --photoX: 35px;   /* ✅ décale la photo vers la droite (augmente/réduis ici) */
+      /* ✅ réglage principal : écart photo <-> enveloppe */
+      --gap: 28px;
     }
 
     *{ box-sizing:border-box; }
@@ -103,8 +102,12 @@
       display:grid;
       grid-template-columns: 340px 820px; /* photo-zone | env-zone */
       align-items:center;
-      justify-content:center;            /* centre les 2 colonnes ensemble */
-      column-gap: 50px;
+
+      /* ✅ IMPORTANT : on n'utilise plus justify-content:center
+         => la photo reste à sa place, et l'enveloppe revient à gauche */
+      justify-content: start;
+
+      column-gap: var(--gap);
       padding: 10px 24px;
       position:relative;
       z-index:1;
@@ -115,6 +118,7 @@
         grid-template-columns: 1fr;
         row-gap: 18px;
         padding: 10px 12px;
+        justify-content: center;
       }
     }
 
@@ -125,8 +129,8 @@
       justify-content:center;
       align-items:center;
 
-      /* ✅ on décale uniquement la photo vers la droite */
-      transform: translateX(var(--photoX));
+      /* ✅ aucun déplacement de l’image */
+      transform: none;
     }
 
     .env-zone{
@@ -168,16 +172,13 @@
       cursor:pointer;
       user-select:none;
 
-      /* ✅ enveloppe placée (si tu veux fine-tune, change --envX, mais par défaut 0) */
-      transform: translateX(var(--envX));
-
-      /* ✅ transition sans déplacement */
+      /* ✅ pas de décalage hover, pas de mouvement */
+      transform: none;
       transition: filter .25s ease;
     }
 
-    /* ✅ IMPORTANT : AU SURVOL, L’ENVELOPPE NE BOUGE PAS */
     .envelope:hover{
-      transform: translateX(var(--envX));
+      transform: none; /* ✅ ne bouge pas */
       filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
     }
 
@@ -305,14 +306,13 @@
       transform: translateX(-50%) translateY(-38px);
     }
 
-    /* ✅ shake sans bouger horizontalement */
     .shake{ animation: shake .35s ease; }
     @keyframes shake{
-      0%   { transform: translateX(var(--envX)) rotate(0deg); }
-      25%  { transform: translateX(var(--envX)) rotate(-1deg); }
-      50%  { transform: translateX(var(--envX)) rotate(1deg); }
-      75%  { transform: translateX(var(--envX)) rotate(-.8deg); }
-      100% { transform: translateX(var(--envX)) rotate(0deg); }
+      0%   { transform: rotate(0deg); }
+      25%  { transform: rotate(-1deg); }
+      50%  { transform: rotate(1deg); }
+      75%  { transform: rotate(-.8deg); }
+      100% { transform: rotate(0deg); }
     }
 
     .result{
@@ -394,11 +394,10 @@
     }
 
     @media (max-width: 520px){
-      .photo-zone{ width: 320px; height: 380px; transform: translateX(0px); }
+      .photo-zone{ width: 320px; height: 380px; }
       .env-zone{ width: 320px; height: 380px; }
       .frame{ width: 250px; }
-      .envelope{ width: 430px; height: 285px; transform: translateX(0px); }
-      .envelope:hover{ transform: translateX(0px); }
+      .envelope{ width: 430px; height: 285px; }
       .letter{ width: 320px; height: 300px; }
     }
   </style>
