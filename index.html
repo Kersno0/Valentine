@@ -18,10 +18,7 @@
       --card: rgba(255,255,255,.72);
       --shadow: 0 18px 60px rgba(0,0,0,.14);
 
-      /* ✅ RÉGLAGE PRINCIPAL DESKTOP : écart photo <-> enveloppe */
       --gap: 28px;
-
-      /* ✅ RÉGLAGE MOBILE : réduit l’écart vertical (photo au-dessus, enveloppe en dessous) */
       --gapMobile: 12px;
     }
 
@@ -36,7 +33,6 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--ink);
 
-      /* ✅ FIX SCROLL iPhone */
       overflow-x: hidden;
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
@@ -90,7 +86,7 @@
     .ambient{
       position:absolute;
       inset:0;
-      pointer-events:none;   /* ✅ ne bloque pas le scroll */
+      pointer-events:none;
       touch-action: pan-y;
       z-index:0;
       overflow:hidden;
@@ -120,7 +116,6 @@
       z-index:1;
     }
 
-    /* photo fixe, ne bouge pas */
     .photo-zone{
       flex: 0 0 340px;
       height: 420px;
@@ -129,7 +124,6 @@
       align-items:center;
     }
 
-    /* enveloppe prend la place, sans agrandir au-delà de 760 */
     .env-zone{
       flex: 0 1 760px;
       min-width: 0;
@@ -162,28 +156,27 @@
     }
     .slides img.active{ opacity:1; }
 
-    /* ===== ENVELOPPE (PAS DE BOUGE AU HOVER) ===== */
+    /* ===== ENVELOPPE ===== */
     .envelope{
       width: 100%;
       max-width: 760px;
       aspect-ratio: 760 / 450;
       height: auto;
-
       position:relative;
+
       cursor:pointer;
       user-select:none;
 
       transform:none;
       transition: filter .25s ease;
+
+      /* ✅ aide iOS */
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation; /* ✅ tap plus fiable */
     }
     .envelope:hover{
       transform:none;
       filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
-    }
-
-    /* ✅ Tap plus fiable (mobile) */
-    .envelope, .envelope *{
-      -webkit-tap-highlight-color: transparent;
     }
 
     .env-body{
@@ -219,7 +212,6 @@
       filter: drop-shadow(0 6px 10px rgba(0,0,0,.10));
     }
 
-    /* Sceau */
     .seal{
       position:absolute;
       left:50%;
@@ -243,7 +235,6 @@
       filter: drop-shadow(0 2px 2px rgba(0,0,0,.14));
     }
 
-    /* On cache le sceau quand ouvert */
     .open .seal,
     .envelope.open .seal,
     #envelope.open .seal{
@@ -253,7 +244,7 @@
       transform: translate(-50%,-50%) scale(.85);
     }
 
-    /* Lettre */
+    /* ✅ IMPORTANT : on enlève pointer-events:none ici, sinon les boutons ne marchent JAMAIS */
     .letter{
       position:absolute;
       left:50%;
@@ -269,7 +260,7 @@
       opacity: 0;
       transform: translateX(-50%) translateY(62px);
       transition: transform .9s cubic-bezier(.2,.9,.2,1), opacity .4s ease;
-      pointer-events: none; /* ✅ la lettre ne bloque pas le tap */
+      pointer-events: none; /* ✅ par défaut : pas cliquable quand cachée */
     }
     .letter p{
       margin:0;
@@ -283,9 +274,7 @@
       flex-wrap:wrap;
       justify-content:center;
       margin-top: 14px;
-      pointer-events: auto; /* ✅ boutons cliquables */
     }
-    .actions *{ pointer-events:auto; }
 
     button{
       border:0;
@@ -312,6 +301,7 @@
     .open .letter{
       opacity: 1;
       transform: translateX(-50%) translateY(-38px);
+      pointer-events: auto; /* ✅ quand ouverte : boutons cliquables */
     }
 
     .shake{ animation: shake .35s ease; }
@@ -333,7 +323,6 @@
       z-index:1;
     }
 
-    /* Overlay final */
     .overlay{
       position:fixed;
       inset:0;
@@ -345,13 +334,11 @@
       backdrop-filter: blur(8px);
       z-index:50;
       padding: 20px;
-
-      pointer-events:none; /* ✅ ne bloque pas le scroll */
-      touch-action: pan-y;
+      pointer-events:none;
     }
     .overlay.show{
       display:grid;
-      pointer-events:auto; /* ✅ cliquable seulement quand visible */
+      pointer-events:auto;
     }
     .final-card{
       width:min(720px, 92vw);
@@ -386,12 +373,10 @@
       50%{ transform: scale(1.12); }
     }
 
-    /* Fireworks hearts */
     .fw{
       position:fixed;
       inset:0;
-      pointer-events:none; /* ✅ ne bloque pas le scroll */
-      touch-action: pan-y;
+      pointer-events:none;
       z-index:60;
       overflow:hidden;
     }
@@ -408,32 +393,26 @@
       100%{ transform: translate(var(--x), var(--y)) scale(1.25); opacity:0; }
     }
 
-    /* ======= MOBILE : enveloppe visible + moins d’écart + pas de vide ======= */
     @media (max-width: 920px){
       .row{
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: var(--gapMobile); /* ✅ réduit l’écart */
+        gap: var(--gapMobile);
         padding: 10px 12px;
       }
-
-      /* ✅ supprime les hauteurs fixes qui créaient du vide énorme */
       .photo-zone, .env-zone{
         width: 100%;
         height: auto;
       }
-
       .frame{
         width: min(320px, 88vw);
       }
-
       .envelope{
         width: min(430px, 92vw);
         height: auto;
         aspect-ratio: 760 / 450;
       }
-
       .letter{
         width: min(320px, 88vw);
         height: auto;
@@ -447,7 +426,7 @@
 </head>
 
 <body>
-  <audio id="song" preload="auto" autoplay loop>
+  <audio id="song" preload="auto" loop>
     <source src="song.mp3" type="audio/mpeg">
   </audio>
 
@@ -487,8 +466,8 @@
               </p>
 
               <div class="actions">
-                <button class="yes" id="yesBtn">Oui 💘</button>
-                <button class="think" id="thinkBtn">Je dois réfléchir 🤔</button>
+                <button class="yes" id="yesBtn" type="button">Oui 💘</button>
+                <button class="think" id="thinkBtn" type="button">Je dois réfléchir 🤔</button>
               </div>
 
               <p style="margin-top:10px;font-weight:1000;text-align:right;">— Ton amoureux</p>
@@ -526,6 +505,9 @@
     let isOpen = false;
     let audioUnlocked = false;
 
+    // Anti double-event (touchend puis click)
+    let lastTouchTime = 0;
+
     // Coeurs en continu
     const heartEmojis = ["💖","💘","💗","💝","💕","✨","🌟"];
     function spawnAmbient(){
@@ -557,20 +539,14 @@
     }
     setInterval(nextSlide, 3200);
 
-    // Audio : autoplay + fallback clic
-    async function tryAutoPlay(){
+    // Audio : on ne force pas autoplay iOS, on unlock au 1er tap
+    async function unlockAudio(){
+      if(audioUnlocked) return;
       try{
         song.volume = 0.85;
         await song.play();
         audioUnlocked = true;
       }catch(e){}
-    }
-    tryAutoPlay();
-
-    function unlockAudio(){
-      if(audioUnlocked) return;
-      song.volume = 0.85;
-      song.play().then(()=> audioUnlocked = true).catch(()=>{});
     }
 
     function openEnvelope(){
@@ -582,7 +558,7 @@
         seal.style.pointerEvents = "none";
       }
       result.textContent = "";
-      unlockAudio();
+      unlockAudio(); // ✅ musique démarre avec le geste
     }
 
     function closeEnvelope(){
@@ -601,29 +577,44 @@
       else openEnvelope();
     }
 
-    // ✅ Tap mobile fiable (pointer + fallback touch) + ignore boutons
     function shouldIgnoreToggle(e){
       const t = e.target;
       return t && t.closest && t.closest("button");
     }
 
-    function onToggle(e){
+    function handleToggle(e){
       if(shouldIgnoreToggle(e)) return;
-      e.preventDefault();
-      e.stopPropagation();
       toggleOpen();
     }
 
-    envelope.addEventListener("pointerup", onToggle, { passive: false });
-    envelope.addEventListener("touchend", onToggle, { passive: false }); // fallback iOS anciens
+    // ✅ Mobile : touchend (le plus fiable)
+    envelope.addEventListener("touchend", (e) => {
+      lastTouchTime = Date.now();
+      e.preventDefault();
+      handleToggle(e);
+    }, { passive:false });
 
-    // clique direct sur le sceau aussi
+    // ✅ Desktop + fallback mobile : click (ignore si un touch vient d'arriver)
+    envelope.addEventListener("click", (e) => {
+      if(Date.now() - lastTouchTime < 450) return;
+      handleToggle(e);
+    });
+
+    // ✅ Sceau = aussi cliquable
     if(seal){
-      seal.addEventListener("pointerup", onToggle, { passive: false });
-      seal.addEventListener("touchend", onToggle, { passive: false });
+      seal.addEventListener("touchend", (e) => {
+        lastTouchTime = Date.now();
+        e.preventDefault();
+        handleToggle(e);
+      }, { passive:false });
+
+      seal.addEventListener("click", (e) => {
+        if(Date.now() - lastTouchTime < 450) return;
+        handleToggle(e);
+      });
     }
 
-    // clavier (desktop)
+    // clavier
     envelope.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -683,7 +674,9 @@
       doShake();
     });
 
-    window.addEventListener("pointerdown", unlockAudio, { once: true });
+    // ✅ si l'utilisateur tape n'importe où, on peut unlock la musique
+    window.addEventListener("touchstart", unlockAudio, { once:true, passive:true });
+    window.addEventListener("pointerdown", unlockAudio, { once:true });
   </script>
 </body>
 </html>
