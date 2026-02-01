@@ -101,23 +101,29 @@
     }
 
     /* ======= LAYOUT ======= */
-    .row{
-      display:grid;
-      grid-template-columns: 340px 820px; /* photo-zone | env-zone */
-      align-items:center;
-      justify-content: start;
-      column-gap: var(--gap);
-      padding: 10px 24px;
-      position:relative;
-      z-index:1;
-    }
+.row{
+  display: grid;
+  grid-template-columns: 340px 820px; /* photo-zone | env-zone */
+  align-items: center;
+  justify-content: start;
+  column-gap: var(--gap);
+  padding: 10px 24px;
+
+  /* ✅ C’EST CETTE LIGNE QUI DÉPLACE TOUT À GAUCHE */
+  margin-left: -60px; /* ajuste: -40px / -50px / -70px */
+
+  position: relative;
+  z-index: 1;
+}
+
 
     @media (max-width: 920px){
       .row{
         grid-template-columns: 1fr;
         row-gap: 18px;
         padding: 10px 12px;
-        justify-content: center;
+        justify-content: start;
+        margin-left: -60px;
       }
     }
 
