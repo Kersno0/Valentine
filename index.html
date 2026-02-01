@@ -9,7 +9,6 @@
     :root{
       --pink1:#fff1f6;
       --pink2:#ffd6e4;
-      --beige:#fff3de;
       --ink:#2b2b2b;
 
       --red:#ff1f5a;
@@ -19,7 +18,7 @@
       --shadow: 0 18px 60px rgba(0,0,0,.14);
 
       --gap: 28px;        /* desktop: écart photo <-> enveloppe */
-      --gapMobile: 6px;   /* ✅ mobile: écart vertical MINIMAL */
+      --gapMobile: 6px;   /* mobile: écart vertical */
     }
 
     *{ box-sizing:border-box; }
@@ -102,7 +101,7 @@
       100%{ transform: translateY(-820px) translateX(var(--drift)) scale(1.35); opacity:0; }
     }
 
-    /* ======= LAYOUT DESKTOP (ne rétrécit pas) ======= */
+    /* ======= LAYOUT DESKTOP ======= */
     .row{
       display:flex;
       align-items:center;
@@ -122,7 +121,7 @@
       align-items:center;
     }
 
-    /* ✅ IMPORTANT: flex:0 0 => ne rétrécit pas */
+    /* ✅ PC: enveloppe ne rétrécit pas */
     .env-zone{
       flex: 0 0 760px;
       height: 480px;
@@ -154,30 +153,15 @@
     }
     .slides img.active{ opacity:1; }
 
-    /* ===== ENVELOPPE (desktop fixe) ===== */
+    /* ===== ENVELOPPE ===== */
     .envelope{
       width: 760px;
       height: 450px;
       position:relative;
       user-select:none;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
       transform:none;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    /* ✅ couche tactile fiable, MAIS ne bloque pas les boutons quand open */
-    .tap-layer{
-      position:absolute;
-      inset:0;
-      z-index:50;
-      border:0;
-      background:transparent;
-      padding:0;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
-    .open .tap-layer{
-      pointer-events:none; /* ✅ laisse cliquer sur Oui / Réfléchir */
     }
 
     .env-body{
@@ -213,7 +197,6 @@
       filter: drop-shadow(0 6px 10px rgba(0,0,0,.10));
     }
 
-    /* Sceau */
     .seal{
       position:absolute;
       left:50%;
@@ -231,13 +214,13 @@
       z-index: 6;
       border: 2px solid rgba(255,255,255,.55);
       transition: opacity .25s ease, transform .25s ease, visibility .25s ease;
+      pointer-events:none;
     }
     .seal span{
       font-size: 34px;
       filter: drop-shadow(0 2px 2px rgba(0,0,0,.14));
     }
 
-    /* Lettre */
     .letter{
       position:absolute;
       left:50%;
@@ -274,7 +257,6 @@
       border-radius: 14px;
       font-weight:1000;
       cursor:pointer;
-      transition: transform .12s ease, box-shadow .2s ease;
       box-shadow: 0 10px 24px rgba(0,0,0,.10);
       -webkit-tap-highlight-color: transparent;
     }
@@ -298,7 +280,6 @@
     .open .seal{
       opacity:0;
       visibility:hidden;
-      pointer-events:none;
       transform: translate(-50%,-50%) scale(.85);
     }
 
@@ -397,19 +378,13 @@
         gap: var(--gapMobile);
         padding: 10px 12px;
       }
-      .photo-zone, .env-zone{
-        width:100%;
-        height:auto;
-      }
+      .photo-zone, .env-zone{ width:100%; height:auto; }
       .frame{ width: min(320px, 88vw); }
-
-      /* ✅ enveloppe responsive sans casser le PC */
       .envelope{
         width: min(430px, 92vw);
         height: auto;
         aspect-ratio: 760 / 450;
       }
-
       .letter{
         width: min(320px, 88vw);
         height:auto;
@@ -443,15 +418,9 @@
 
         <div class="env-zone">
           <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
-            <!-- bouton invisible qui capte les taps -->
-            <button id="tapEnvelope" class="tap-layer" type="button" aria-label="Ouvrir l'enveloppe"></button>
-
-            <div class="env-body">
-              <div class="env-bottom"></div>
-            </div>
+            <div class="env-body"><div class="env-bottom"></div></div>
             <div class="flap"></div>
-
-            <div class="seal" id="seal"><span>❤</span></div>
+            <div class="seal"><span>❤</span></div>
 
             <article class="letter" id="letter" aria-live="polite">
               <p>
@@ -488,7 +457,6 @@
 
   <script>
     const envelope = document.getElementById("envelope");
-    const tapEnvelope = document.getElementById("tapEnvelope");
     const result = document.getElementById("result");
     const yesBtn = document.getElementById("yesBtn");
     const thinkBtn = document.getElementById("thinkBtn");
@@ -500,6 +468,7 @@
 
     let isOpen = false;
     let audioUnlocked = false;
+    let lastTap = 0;
 
     // Coeurs en continu
     const heartEmojis = ["💖","💘","💗","💝","💕","✨","🌟"];
@@ -543,7 +512,6 @@
     function openEnvelope(){
       isOpen = true;
       envelope.classList.add("open");
-      result.textContent = "";
       unlockAudio();
     }
     function closeEnvelope(){
@@ -556,11 +524,24 @@
       else openEnvelope();
     }
 
-    /* ✅ Pointer events = 1 seul système (PC + mobile), pas de double tap */
-    tapEnvelope.addEventListener("pointerup", (e) => {
-      e.preventDefault();
+    // ✅ OUVERTURE SUPER FIABLE (Safari + Chrome)
+    function toggleFromTap(e){
+      // ignore si on a tap/click sur un bouton
+      if (e.target.closest(".action")) return;
+
+      // anti double (touchend + click)
+      const now = Date.now();
+      if (now - lastTap < 350) return;
+      lastTap = now;
+
       toggleOpen();
-    });
+    }
+
+    envelope.addEventListener("click", toggleFromTap);
+    envelope.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      toggleFromTap(e);
+    }, { passive:false });
 
     // clavier (PC)
     envelope.addEventListener("keydown", (e) => {
@@ -585,7 +566,6 @@
         setTimeout(() => p.remove(), 1750);
       }
     }
-
     function heartFireworks(durationMs=3600){
       const start = Date.now();
       const tick = () => {
@@ -603,7 +583,8 @@
       envelope.classList.add("shake");
     }
 
-    yesBtn.addEventListener("click", (e) => {
+    function onYes(e){
+      e.preventDefault();
       e.stopPropagation();
       openEnvelope();
       result.textContent = "OUIIIII 💞";
@@ -611,18 +592,26 @@
       overlay.classList.add("show");
       overlay.setAttribute("aria-hidden","false");
       unlockAudio();
-    });
-
-    thinkBtn.addEventListener("click", (e) => {
+    }
+    function onThink(e){
+      e.preventDefault();
       e.stopPropagation();
       openEnvelope();
       result.textContent = "Réessaie… tu t’es trompée 😇💗";
       doShake();
       unlockAudio();
-    });
+    }
+
+    // ✅ boutons: click + touchend (Safari)
+    yesBtn.addEventListener("click", onYes);
+    yesBtn.addEventListener("touchend", (e)=>{ e.preventDefault(); onYes(e); }, { passive:false });
+
+    thinkBtn.addEventListener("click", onThink);
+    thinkBtn.addEventListener("touchend", (e)=>{ e.preventDefault(); onThink(e); }, { passive:false });
 
     // déverrouille la musique au 1er geste
     window.addEventListener("pointerdown", unlockAudio, { once:true });
+    window.addEventListener("touchstart", unlockAudio, { once:true, passive:true });
   </script>
 </body>
 </html>
