@@ -26,20 +26,16 @@
     html, body{ height:100%; }
 
     body{
-  margin:0;
-  min-height:100vh;
-  display:grid;
-  place-items:center;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color:var(--ink);
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
 
-  overflow-x:hidden;
-  overflow-y:auto;
-  -webkit-overflow-scrolling: touch;
-
-  /* ✅ IMPORTANT : ne mets pas touch-action ici */
-}
-
+      overflow-x:hidden;
+      overflow-y:auto;
+      -webkit-overflow-scrolling: touch;
 
       background:
         radial-gradient(1000px 450px at 15% 20%, rgba(255,255,255,.85) 0%, transparent 60%),
@@ -127,13 +123,13 @@
     }
 
     .env-zone{
-  flex: 0 0 760px;   /* ✅ ne rétrécit plus */
-  height: 480px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
+      flex: 0 1 760px;
+      min-width: 0;
+      height: 480px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
 
     /* ===== PHOTO ===== */
     .frame{
@@ -160,31 +156,30 @@
 
     /* ===== ENVELOPPE ===== */
     .envelope{
-  width: 760px;      /* ✅ taille PC identique à avant */
-  height: 450px;     /* ✅ */
-  position:relative;
-  cursor:pointer;
-  user-select:none;
-  transform:none;
-  transition: filter .25s ease;
-}
+      width: 100%;
+      max-width: 760px;
+      aspect-ratio: 760 / 450;
+      height:auto;
 
+      position:relative;
+      user-select:none;
+      transform:none;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
 
     /* ✅ couche tactile fiable (PC + mobile) */
     .tap-layer{
-  position:absolute;
-  inset:0;
-  z-index:50;
-  border:0;
-  background:transparent;
-  padding:0;
-  cursor:pointer;
-  -webkit-tap-highlight-color: transparent;
-
-  /* ✅ retire ça */
-  /* touch-action: manipulation; */
-}
-
+      position:absolute;
+      inset:0;
+      z-index:50;
+      border:0;
+      background:transparent;
+      padding:0;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
+    }
 
     .env-body{
       position:absolute;
@@ -411,17 +406,6 @@
       .letter{
         width: min(320px, 88vw);
         height:auto;
-      .env-zone{
-    flex: 0 1 auto;
-    width: 100%;
-    height: auto;
-  }
-      .envelope{
-    width: min(430px, 92vw);
-    height: auto;
-    aspect-ratio: 760 / 450;
-  }
-}
       }
     }
   </style>
@@ -567,10 +551,10 @@
 
     // ✅ clic / tap fiable (PC + mobile)
     tapEnvelope.addEventListener("click", toggleOpen);
-    tapEnvelope.addEventListener("touchend", () => {
-  toggleOpen();
-}, { passive:true });
-
+    tapEnvelope.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      toggleOpen();
+    }, { passive:false });
 
     // clavier (PC)
     envelope.addEventListener("keydown", (e) => {
@@ -598,7 +582,7 @@
     function heartFireworks(durationMs=3600){
       const start = Date.now();
       const tick = () => {
-        burstAt(Math.random()innerWidth, 80 + Math.random()(innerHeight*0.55), 18);
+        burstAt(Math.random()*innerWidth, 80 + Math.random()*(innerHeight*0.55), 18);
         if (Date.now() - start < durationMs) setTimeout(tick, 420);
       };
       tick();
