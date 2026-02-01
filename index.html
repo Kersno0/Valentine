@@ -18,11 +18,11 @@
       --card: rgba(255,255,255,.72);
       --shadow: 0 18px 60px rgba(0,0,0,.14);
 
-      /* ✅ réglage principal : écart photo <-> enveloppe (grid) */
+      /* ✅ réglage principal : écart photo <-> enveloppe */
       --gap: 18px;
 
       /* ✅ réglage QUI MARCHE : rapproche l’enveloppe SANS bouger l’image */
-      --gapFix: -55px; /* essaie -35px / -45px / -65px selon ton écran */
+      --envShift: -55px; /* essaie -35px / -45px / -65px selon ton écran */
     }
 
     *{ box-sizing:border-box; }
@@ -127,7 +127,11 @@
       display:flex;
       justify-content:center;
       align-items:center;
-      transform: none; /* ✅ image ne bouge pas */
+
+      /* ✅ IMPORTANT : la photo ne bouge pas */
+      justify-self: start;
+      margin-left: 0;
+      transform: none;
     }
 
     .env-zone{
@@ -136,6 +140,9 @@
       display:flex;
       justify-content:center;
       align-items:center;
+
+      /* ✅ IMPORTANT : on déplace SEULEMENT la colonne enveloppe */
+      margin-left: var(--envShift);
     }
 
     /* ===== PHOTO ===== */
@@ -169,10 +176,7 @@
       cursor:pointer;
       user-select:none;
 
-      /* ✅ C’EST ÇA qui réduit l’écart SANS bouger l’image */
-      margin-left: var(--gapFix);
-
-      /* ✅ pas de mouvement au hover */
+      /* ✅ aucun déplacement */
       transform: none;
       transition: filter .25s ease;
     }
@@ -395,12 +399,12 @@
 
     @media (max-width: 520px){
       .photo-zone{ width: 320px; height: 380px; }
-      .env-zone{ width: 320px; height: 380px; }
-      .frame{ width: 250px; }
-      .envelope{
-        width: 430px; height: 285px;
-        margin-left: 0px; /* mobile : pas de décalage */
+      .env-zone{
+        width: 320px; height: 380px;
+        margin-left: 0; /* mobile : pas de décalage */
       }
+      .frame{ width: 250px; }
+      .envelope{ width: 430px; height: 285px; }
       .letter{ width: 320px; height: 300px; }
     }
   </style>
