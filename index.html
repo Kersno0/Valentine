@@ -155,14 +155,16 @@
 
     /* ===== ENVELOPPE ===== */
     .envelope{
-      width: 760px;
-      height: 450px;
-      position:relative;
-      user-select:none;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-      transform:none;
-    }
+  width: 100%;
+  max-width: 760px;
+  aspect-ratio: 760 / 450;
+  height: auto;
+  margin-left: -20px; /* ✅ ajuste ici */
+  position:relative;
+  user-select:none;
+  cursor:pointer;
+  -webkit-tap-highlight-color: transparent;
+}
 
     .env-body{
       position:absolute;
