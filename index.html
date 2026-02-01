@@ -582,7 +582,7 @@
     function heartFireworks(durationMs=3600){
       const start = Date.now();
       const tick = () => {
-        burstAt(Math.random()*innerWidth, 80 + Math.random()*(innerHeight*0.55), 18);
+        burstAt(Math.random()innerWidth, 80 + Math.random()(innerHeight*0.55), 18);
         if (Date.now() - start < durationMs) setTimeout(tick, 420);
       };
       tick();
