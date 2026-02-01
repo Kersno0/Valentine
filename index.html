@@ -18,11 +18,13 @@
       --card: rgba(255,255,255,.72);
       --shadow: 0 18px 60px rgba(0,0,0,.14);
 
-      /* ✅ SEUL RÉGLAGE À TOUCHER POUR RAPPROCHER PHOTO <-> ENVELOPPE */
-      --gap: 28px; /* essaie 18px / 24px / 32px */
+      --gap: 28px;        /* desktop: écart photo <-> enveloppe */
+      --gapMobile: 12px;  /* mobile: écart vertical */
     }
 
     *{ box-sizing:border-box; }
+    html, body{ height:100%; }
+
     body{
       margin:0;
       min-height:100vh;
@@ -30,7 +32,10 @@
       place-items:center;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--ink);
-      overflow:hidden;
+
+      overflow-x:hidden;
+      overflow-y:auto;
+      -webkit-overflow-scrolling: touch;
 
       background:
         radial-gradient(1000px 450px at 15% 20%, rgba(255,255,255,.85) 0%, transparent 60%),
@@ -97,81 +102,34 @@
       100%{ transform: translateY(-820px) translateX(var(--drift)) scale(1.35); opacity:0; }
     }
 
-    /* ======= LAYOUT (FIX: plus de rognage à gauche) ======= */
-.row{
-  display:flex;
-  align-items:center;
-  justify-content:center;   /* ✅ centre le groupe photo+enveloppe */
-  gap: var(--gap);
-  padding: 10px 24px;
-  width:100%;
-  position:relative;
-  z-index:1;
-}
+    /* ======= LAYOUT ======= */
+    .row{
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap: var(--gap);
+      padding: 10px 24px;
+      width:100%;
+      position:relative;
+      z-index:1;
+    }
 
+    .photo-zone{
+      flex: 0 0 340px;
+      height: 420px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
 
-/* photo fixe, ne bouge pas */
-.photo-zone{
-  flex: 0 0 340px;             /* fixe */
-  height: 420px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-/* enveloppe flexible : elle prend la place restante */
-.env-zone{
-  flex: 0 1 760px;          /* ✅ base 760px, peut rétrécir, NE GRANDIT PAS */
-  min-width: 0;
-  height: 480px;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-}
-
-
-/* enveloppe responsive : se rétrécit si besoin */
-.envelope{
-  width: 100%;
-  max-width: 760px;
-  aspect-ratio: 760 / 450;
-  height: auto;
-
-  position:relative;
-  cursor:pointer;
-  user-select:none;
-
-  transform:none;
-  transition: filter .25s ease;
-}
-.envelope:hover{
-  transform:none;
-  filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
-}
-
-
-.envelope:hover{
-  transform:none;
-  filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
-}
-
-/* Mobile */
-@media (max-width: 920px){
-  .row{
-    flex-direction:column;
-    gap: 18px;
-    padding: 10px 12px;
-  }
-  .photo-zone{
-    flex: 0 0 auto;
-    width: 340px;
-  }
-  .env-zone{
-    height: auto;
-    width: 100%;
-  }
-}
-
+    .env-zone{
+      flex: 0 1 760px;
+      min-width: 0;
+      height: 480px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+    }
 
     /* ===== PHOTO ===== */
     .frame{
@@ -196,25 +154,31 @@
     }
     .slides img.active{ opacity:1; }
 
-    /* ===== ENVELOPPE (RESPONSIVE + PAS DE BOUGE) ===== */
+    /* ===== ENVELOPPE ===== */
     .envelope{
       width: 100%;
       max-width: 760px;
       aspect-ratio: 760 / 450;
-      height: auto;
+      height:auto;
 
       position:relative;
-      cursor:pointer;
       user-select:none;
-
-      /* ✅ pas de mouvement */
       transform:none;
-      transition: filter .25s ease;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .envelope:hover{
-      transform:none; /* ✅ ne bouge pas */
-      filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
+    /* ✅ couche tactile fiable (PC + mobile) */
+    .tap-layer{
+      position:absolute;
+      inset:0;
+      z-index:50;
+      border:0;
+      background:transparent;
+      padding:0;
+      cursor:pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     .env-body{
@@ -274,16 +238,6 @@
       filter: drop-shadow(0 2px 2px rgba(0,0,0,.14));
     }
 
-    /* On cache le sceau quand ouvert */
-    .open .seal,
-    .envelope.open .seal,
-    #envelope.open .seal{
-      opacity:0;
-      visibility:hidden;
-      pointer-events:none;
-      transform: translate(-50%,-50%) scale(.85);
-    }
-
     /* Lettre */
     .letter{
       position:absolute;
@@ -300,6 +254,7 @@
       opacity: 0;
       transform: translateX(-50%) translateY(62px);
       transition: transform .9s cubic-bezier(.2,.9,.2,1), opacity .4s ease;
+      pointer-events:none;
     }
     .letter p{
       margin:0;
@@ -314,7 +269,7 @@
       justify-content:center;
       margin-top: 14px;
     }
-    button{
+    button.action{
       border:0;
       padding:12px 15px;
       border-radius: 14px;
@@ -322,6 +277,7 @@
       cursor:pointer;
       transition: transform .12s ease, box-shadow .2s ease;
       box-shadow: 0 10px 24px rgba(0,0,0,.10);
+      touch-action: manipulation;
     }
     .yes{
       background: linear-gradient(135deg, var(--red), var(--red2));
@@ -332,13 +288,19 @@
       color:#3b1a22;
       border:2px solid rgba(255,31,90,.14);
     }
-    button:hover{ transform: translateY(-1px); }
-    button:active{ transform: translateY(1px) scale(.99); }
 
+    /* OUVERTURE */
     .open .flap{ transform: rotateX(160deg); }
     .open .letter{
       opacity: 1;
       transform: translateX(-50%) translateY(-38px);
+      pointer-events:auto;
+    }
+    .open .seal{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transform: translate(-50%,-50%) scale(.85);
     }
 
     .shake{ animation: shake .35s ease; }
@@ -428,17 +390,29 @@
       100%{ transform: translate(var(--x), var(--y)) scale(1.25); opacity:0; }
     }
 
-    @media (max-width: 520px){
-      .photo-zone{ width: 320px; height: 380px; }
-      .frame{ width: 250px; }
-      .letter{ width: 320px; height: 300px; }
-      .env-zone{ height:auto; }
+    /* MOBILE */
+    @media (max-width: 920px){
+      .row{
+        flex-direction: column;
+        gap: var(--gapMobile);
+        padding: 10px 12px;
+      }
+      .photo-zone, .env-zone{
+        width:100%;
+        height:auto;
+      }
+      .frame{ width: min(320px, 88vw); }
+      .envelope{ width: min(430px, 92vw); }
+      .letter{
+        width: min(320px, 88vw);
+        height:auto;
+      }
     }
   </style>
 </head>
 
 <body>
-  <audio id="song" preload="auto" autoplay loop>
+  <audio id="song" preload="auto" loop>
     <source src="song.mp3" type="audio/mpeg">
   </audio>
 
@@ -462,6 +436,9 @@
 
         <div class="env-zone">
           <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
+            <!-- ✅ bouton invisible qui capte tous les clics / taps -->
+            <button id="tapEnvelope" class="tap-layer" type="button" aria-label="Ouvrir l'enveloppe"></button>
+
             <div class="env-body">
               <div class="env-bottom"></div>
             </div>
@@ -478,8 +455,8 @@
               </p>
 
               <div class="actions">
-                <button class="yes" id="yesBtn">Oui 💘</button>
-                <button class="think" id="thinkBtn">Je dois réfléchir 🤔</button>
+                <button class="action yes" id="yesBtn" type="button">Oui 💘</button>
+                <button class="action think" id="thinkBtn" type="button">Je dois réfléchir 🤔</button>
               </div>
 
               <p style="margin-top:10px;font-weight:1000;text-align:right;">— Ton amoureux</p>
@@ -504,7 +481,7 @@
 
   <script>
     const envelope = document.getElementById("envelope");
-    const seal = document.getElementById("seal");
+    const tapEnvelope = document.getElementById("tapEnvelope");
     const result = document.getElementById("result");
     const yesBtn = document.getElementById("yesBtn");
     const thinkBtn = document.getElementById("thinkBtn");
@@ -541,63 +518,50 @@
     // Slider
     const imgs = Array.from(slidesEl.querySelectorAll("img"));
     let idx = 0;
-    function nextSlide(){
+    setInterval(() => {
       imgs[idx].classList.remove("active");
       idx = (idx + 1) % imgs.length;
       imgs[idx].classList.add("active");
-    }
-    setInterval(nextSlide, 3200);
+    }, 3200);
 
-    // Audio : autoplay + fallback clic
-    async function tryAutoPlay(){
+    async function unlockAudio(){
+      if(audioUnlocked) return;
       try{
         song.volume = 0.85;
         await song.play();
         audioUnlocked = true;
       }catch(e){}
     }
-    tryAutoPlay();
-
-    function unlockAudio(){
-      if(audioUnlocked) return;
-      song.volume = 0.85;
-      song.play().then(()=> audioUnlocked = true).catch(()=>{});
-    }
 
     function openEnvelope(){
       isOpen = true;
       envelope.classList.add("open");
-      if(seal){
-        seal.style.opacity = "0";
-        seal.style.visibility = "hidden";
-        seal.style.pointerEvents = "none";
-      }
       result.textContent = "";
       unlockAudio();
     }
-
     function closeEnvelope(){
       isOpen = false;
       envelope.classList.remove("open");
-      if(seal){
-        seal.style.opacity = "";
-        seal.style.visibility = "";
-        seal.style.pointerEvents = "";
-      }
       result.textContent = "";
     }
-
     function toggleOpen(){
       if(isOpen) closeEnvelope();
       else openEnvelope();
     }
 
-    envelope.addEventListener("click", (e) => {
-      if (e.target.tagName.toLowerCase() === "button") return;
+    // ✅ clic / tap fiable (PC + mobile)
+    tapEnvelope.addEventListener("click", toggleOpen);
+    tapEnvelope.addEventListener("touchend", (e) => {
+      e.preventDefault();
       toggleOpen();
-    });
+    }, { passive:false });
+
+    // clavier (PC)
     envelope.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") toggleOpen();
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleOpen();
+      }
     });
 
     function burstAt(x, y, count=18){
@@ -609,10 +573,8 @@
         p.style.top = y + "px";
         const angle = Math.random() * Math.PI * 2;
         const dist = 90 + Math.random() * 200;
-        const dx = Math.cos(angle) * dist;
-        const dy = Math.sin(angle) * dist;
-        p.style.setProperty("--x", dx + "px");
-        p.style.setProperty("--y", dy + "px");
+        p.style.setProperty("--x", (Math.cos(angle)*dist) + "px");
+        p.style.setProperty("--y", (Math.sin(angle)*dist) + "px");
         fw.appendChild(p);
         setTimeout(() => p.remove(), 1750);
       }
@@ -620,12 +582,8 @@
     function heartFireworks(durationMs=3600){
       const start = Date.now();
       const tick = () => {
-        const w = window.innerWidth;
-        const h = window.innerHeight;
-        burstAt(Math.random()*w, 80 + Math.random()*(h*0.55), 18);
-        if (Date.now() - start < durationMs){
-          setTimeout(tick, 420);
-        }
+        burstAt(Math.random()innerWidth, 80 + Math.random()(innerHeight*0.55), 18);
+        if (Date.now() - start < durationMs) setTimeout(tick, 420);
       };
       tick();
     }
@@ -643,6 +601,7 @@
       heartFireworks(3600);
       overlay.classList.add("show");
       overlay.setAttribute("aria-hidden","false");
+      unlockAudio();
     });
 
     thinkBtn.addEventListener("click", (e) => {
@@ -650,9 +609,12 @@
       openEnvelope();
       result.textContent = "Réessaie… tu t’es trompée 😇💗";
       doShake();
+      unlockAudio();
     });
 
-    window.addEventListener("pointerdown", unlockAudio, { once: true });
+    // déverrouille la musique au 1er geste
+    window.addEventListener("pointerdown", unlockAudio, { once:true });
+    window.addEventListener("touchstart", unlockAudio, { once:true, passive:true });
   </script>
 </body>
 </html>
