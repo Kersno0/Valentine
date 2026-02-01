@@ -97,48 +97,74 @@
       100%{ transform: translateY(-820px) translateX(var(--drift)) scale(1.35); opacity:0; }
     }
 
-    /* ======= LAYOUT (PROPRE & RESPONSIVE) ======= */
-    .row{
-      display:grid;
+   /* ======= LAYOUT (FIX: plus de rognage à gauche) ======= */
+.row{
+  display:flex;
+  align-items:center;
+  justify-content:center;      /* centre l’ensemble dans la carte */
+  gap: var(--gap);             /* ton écart réel */
+  padding: 10px 24px;
+  width:100%;                  /* important */
+  position:relative;
+  z-index:1;
+}
 
-      /* ✅ IMPORTANT : 2e colonne flexible -> l’enveloppe ne colle plus au bord droit */
-      grid-template-columns: 340px minmax(0, 1fr);
+/* photo fixe, ne bouge pas */
+.photo-zone{
+  flex: 0 0 340px;             /* fixe */
+  height: 420px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-      align-items:center;
-      justify-content:center;        /* centre l’ensemble dans la carte */
-      column-gap: var(--gap);        /* ✅ ton écart réel */
-      padding: 10px 24px;
-      position:relative;
-      z-index:1;
-    }
+/* enveloppe flexible : elle prend la place restante */
+.env-zone{
+  flex: 1 1 auto;              /* ✅ prend le reste */
+  min-width: 0;                /* ✅ évite les débordements */
+  height: 480px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
 
-    @media (max-width: 920px){
-      .row{
-        grid-template-columns: 1fr;
-        row-gap: 18px;
-        justify-content:center;
-        padding: 10px 12px;
-      }
-    }
+/* enveloppe responsive : se rétrécit si besoin */
+.envelope{
+  width: 100%;                 /* ✅ s’adapte à la place dispo */
+  max-width: 760px;            /* taille max normale */
+  aspect-ratio: 760 / 450;
+  height: auto;
 
-    /* Zone photo */
-    .photo-zone{
-      width: 340px;
-      height: 420px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      justify-self:center; /* ✅ photo bien dans sa colonne */
-    }
+  position:relative;
+  cursor:pointer;
+  user-select:none;
 
-    /* Zone enveloppe */
-    .env-zone{
-      height: 480px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      min-width:0; /* ✅ CRUCIAL en grid pour éviter les débordements */
-    }
+  transform:none;              /* ✅ ne bouge pas */
+  transition: filter .25s ease;
+}
+
+.envelope:hover{
+  transform:none;
+  filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
+}
+
+/* Mobile */
+@media (max-width: 920px){
+  .row{
+    flex-direction:column;
+    gap: 18px;
+    padding: 10px 12px;
+  }
+  .photo-zone{
+    flex: 0 0 auto;
+    width: 340px;
+  }
+  .env-zone{
+    height: auto;
+    width: 100%;
+  }
+}
+
 
     /* ===== PHOTO ===== */
     .frame{
