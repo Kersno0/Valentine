@@ -33,10 +33,9 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--ink);
 
-      overflow-x: hidden;
-      overflow-y: auto;
+      overflow-x:hidden;
+      overflow-y:auto;
       -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
 
       background:
         radial-gradient(1000px 450px at 15% 20%, rgba(255,255,255,.85) 0%, transparent 60%),
@@ -103,7 +102,7 @@
       100%{ transform: translateY(-820px) translateX(var(--drift)) scale(1.35); opacity:0; }
     }
 
-    /* ======= LAYOUT DESKTOP ======= */
+    /* ======= LAYOUT ======= */
     .row{
       display:flex;
       align-items:center;
@@ -163,20 +162,21 @@
       height: auto;
 
       position:relative;
-      cursor:pointer;
       user-select:none;
-
       transform:none;
-      transition: filter .25s ease;
+    }
 
+    /* ✅ couche tactile ultra fiable */
+    .tap-layer{
+      position:absolute;
+      inset:0;
+      z-index:50;
+      border:0;
+      background:transparent;
+      padding:0;
+      cursor:pointer;
       -webkit-tap-highlight-color: transparent;
       touch-action: manipulation;
-
-      z-index: 2; /* ✅ au-dessus */
-    }
-    .envelope:hover{
-      transform:none;
-      filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
     }
 
     .env-body{
@@ -235,15 +235,6 @@
       filter: drop-shadow(0 2px 2px rgba(0,0,0,.14));
     }
 
-    .open .seal,
-    .envelope.open .seal,
-    #envelope.open .seal{
-      opacity:0;
-      visibility:hidden;
-      pointer-events:none;
-      transform: translate(-50%,-50%) scale(.85);
-    }
-
     /* Lettre */
     .letter{
       position:absolute;
@@ -260,8 +251,7 @@
       opacity: 0;
       transform: translateX(-50%) translateY(62px);
       transition: transform .9s cubic-bezier(.2,.9,.2,1), opacity .4s ease;
-
-      pointer-events: none; /* fermé */
+      pointer-events:none;
     }
     .letter p{
       margin:0;
@@ -276,7 +266,7 @@
       justify-content:center;
       margin-top: 14px;
     }
-    button{
+    button.action{
       border:0;
       padding:12px 15px;
       border-radius: 14px;
@@ -295,14 +285,19 @@
       color:#3b1a22;
       border:2px solid rgba(255,31,90,.14);
     }
-    button:hover{ transform: translateY(-1px); }
-    button:active{ transform: translateY(1px) scale(.99); }
 
     .open .flap{ transform: rotateX(160deg); }
     .open .letter{
       opacity: 1;
       transform: translateX(-50%) translateY(-38px);
-      pointer-events: auto; /* ouvert => boutons OK */
+      pointer-events:auto;
+    }
+
+    .open .seal{
+      opacity:0;
+      visibility:hidden;
+      pointer-events:none;
+      transform: translate(-50%,-50%) scale(.85);
     }
 
     .shake{ animation: shake .35s ease; }
@@ -324,6 +319,7 @@
       z-index:1;
     }
 
+    /* Overlay final */
     .overlay{
       position:fixed;
       inset:0;
@@ -335,12 +331,8 @@
       backdrop-filter: blur(8px);
       z-index:50;
       padding: 20px;
-      pointer-events:none;
     }
-    .overlay.show{
-      display:grid;
-      pointer-events:auto;
-    }
+    .overlay.show{ display:grid; }
     .final-card{
       width:min(720px, 92vw);
       background: rgba(255,255,255,.78);
@@ -394,23 +386,22 @@
       100%{ transform: translate(var(--x), var(--y)) scale(1.25); opacity:0; }
     }
 
+    /* ===== MOBILE ===== */
     @media (max-width: 920px){
       .row{
         flex-direction: column;
-        align-items: center;
-        justify-content: center;
         gap: var(--gapMobile);
         padding: 10px 12px;
       }
       .photo-zone, .env-zone{
-        width: 100%;
-        height: auto;
+        width:100%;
+        height:auto;
       }
       .frame{ width: min(320px, 88vw); }
       .envelope{ width: min(430px, 92vw); }
       .letter{
         width: min(320px, 88vw);
-        height: auto;
+        height:auto;
       }
     }
   </style>
@@ -441,6 +432,10 @@
 
         <div class="env-zone">
           <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="Ouvrir l'enveloppe">
+
+            <!-- ✅ bouton invisible qui capte TOUS les clics / taps -->
+            <button id="tapEnvelope" class="tap-layer" type="button" aria-label="Ouvrir l'enveloppe"></button>
+
             <div class="env-body">
               <div class="env-bottom"></div>
             </div>
@@ -457,8 +452,8 @@
               </p>
 
               <div class="actions">
-                <button class="yes" id="yesBtn" type="button">Oui 💘</button>
-                <button class="think" id="thinkBtn" type="button">Je dois réfléchir 🤔</button>
+                <button class="action yes" id="yesBtn" type="button">Oui 💘</button>
+                <button class="action think" id="thinkBtn" type="button">Je dois réfléchir 🤔</button>
               </div>
 
               <p style="margin-top:10px;font-weight:1000;text-align:right;">— Ton amoureux</p>
@@ -483,6 +478,7 @@
 
   <script>
     const envelope = document.getElementById("envelope");
+    const tapEnvelope = document.getElementById("tapEnvelope");
     const seal = document.getElementById("seal");
     const result = document.getElementById("result");
     const yesBtn = document.getElementById("yesBtn");
@@ -496,7 +492,7 @@
     let isOpen = false;
     let audioUnlocked = false;
 
-    // ✅ Coeurs en continu
+    // Coeurs en continu
     const heartEmojis = ["💖","💘","💗","💝","💕","✨","🌟"];
     function spawnAmbient(){
       const h = document.createElement("div");
@@ -517,7 +513,7 @@
     setInterval(spawnAmbient, 420);
     for(let i=0;i<12;i++) spawnAmbient();
 
-    // ✅ Slider
+    // Slider
     const imgs = Array.from(slidesEl.querySelectorAll("img"));
     let idx = 0;
     setInterval(() => {
@@ -526,7 +522,6 @@
       imgs[idx].classList.add("active");
     }, 3200);
 
-    // ✅ Audio : se déverrouille sur un geste utilisateur
     async function unlockAudio(){
       if(audioUnlocked) return;
       try{
@@ -564,30 +559,12 @@
       else openEnvelope();
     }
 
-    // ✅ Ne pas ouvrir/fermer quand on clique sur un bouton
-    function clickedOnButton(e){
-      return e.target && e.target.closest && e.target.closest("button");
-    }
-
-    // ✅ Handler unique, très fiable (PC + mobile)
-    function handleEnvelopeTap(e){
-      if(clickedOnButton(e)) return;
+    // ✅ On utilise UNIQUEMENT le bouton invisible (fiable PC + mobile)
+    tapEnvelope.addEventListener("click", () => {
       toggleOpen();
-    }
+    });
 
-    // ✅ IMPORTANT : on écoute pointerup (mobile + desktop modernes)
-    envelope.addEventListener("pointerup", handleEnvelopeTap);
-
-    // ✅ Fallback click (au cas où certains navigateurs)
-    envelope.addEventListener("click", handleEnvelopeTap);
-
-    // ✅ Le sceau aussi (au cas où)
-    if(seal){
-      seal.addEventListener("pointerup", handleEnvelopeTap);
-      seal.addEventListener("click", handleEnvelopeTap);
-    }
-
-    // ✅ Clavier
+    // clavier
     envelope.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -595,7 +572,6 @@
       }
     });
 
-    // ✅ Fireworks
     function burstAt(x, y, count=18){
       for(let i=0;i<count;i++){
         const p = document.createElement("div");
@@ -626,7 +602,6 @@
       envelope.classList.add("shake");
     }
 
-    // ✅ Boutons (ils marchent maintenant)
     yesBtn.addEventListener("click", (e) => {
       e.stopPropagation();
       openEnvelope();
@@ -643,7 +618,7 @@
       doShake();
     });
 
-    // ✅ Déverrouille musique dès le 1er geste n'importe où
+    // déverrouille musique dès le 1er geste
     window.addEventListener("pointerdown", unlockAudio, { once:true });
     window.addEventListener("touchstart", unlockAudio, { once:true, passive:true });
   </script>
