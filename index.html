@@ -127,13 +127,13 @@
     }
 
     .env-zone{
-      flex: 0 1 760px;
-      min-width: 0;
-      height: 480px;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-    }
+  flex: 0 0 760px;   /* ✅ ne rétrécit plus */
+  height: 480px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+
 
     /* ===== PHOTO ===== */
     .frame{
@@ -160,17 +160,15 @@
 
     /* ===== ENVELOPPE ===== */
     .envelope{
-      width: 100%;
-      max-width: 760px;
-      aspect-ratio: 760 / 450;
-      height:auto;
+  width: 760px;      /* ✅ taille PC identique à avant */
+  height: 450px;     /* ✅ */
+  position:relative;
+  cursor:pointer;
+  user-select:none;
+  transform:none;
+  transition: filter .25s ease;
+}
 
-      position:relative;
-      user-select:none;
-      transform:none;
-      cursor:pointer;
-      -webkit-tap-highlight-color: transparent;
-    }
 
     /* ✅ couche tactile fiable (PC + mobile) */
     .tap-layer{
@@ -413,6 +411,17 @@
       .letter{
         width: min(320px, 88vw);
         height:auto;
+      .env-zone{
+    flex: 0 1 auto;
+    width: 100%;
+    height: auto;
+  }
+      .envelope{
+    width: min(430px, 92vw);
+    height: auto;
+    aspect-ratio: 760 / 450;
+  }
+}
       }
     }
   </style>
