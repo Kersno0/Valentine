@@ -17,8 +17,8 @@
       --card: rgba(255,255,255,.72);
       --shadow: 0 18px 60px rgba(0,0,0,.14);
 
-      --gap: 28px;        /* desktop */
-      --gapMobile: 6px;   /* mobile */
+      --gap: 28px;        /* desktop: écart photo <-> enveloppe */
+      --gapMobile: 6px;   /* mobile: écart vertical */
     }
 
     *{ box-sizing:border-box; }
@@ -43,9 +43,8 @@
         linear-gradient(135deg, var(--pink1), var(--pink2));
     }
 
-    /* ✅ un poil plus large pour que photo+enveloppe rentrent */
     .wrap{
-      width:min(1200px, 92vw);
+      width:min(1120px, 92vw);
       display:grid;
       gap:14px;
       justify-items:center;
@@ -69,9 +68,8 @@
       line-height:1.35;
     }
 
-    /* ✅ un poil plus large aussi */
     .card{
-      width:min(1180px, 100%);
+      width:min(1100px, 100%);
       background: var(--card);
       border: 1px solid rgba(255,255,255,.7);
       border-radius: 30px;
@@ -123,10 +121,9 @@
       align-items:center;
     }
 
-    /* ✅ IMPORTANT : enveloppe peut "respirer" et rester bien centrée */
+    /* ✅ PC: enveloppe ne rétrécit pas */
     .env-zone{
-      flex: 1 1 760px;        /* peut prendre la place restante */
-      min-width: 0;
+      flex: 0 0 760px;
       height: 480px;
       display:flex;
       justify-content:center;
@@ -157,13 +154,9 @@
     .slides img.active{ opacity:1; }
 
     /* ===== ENVELOPPE ===== */
-    /* ✅ plus de taille fixe sur PC -> width:100% + max-width */
     .envelope{
-      width: 100%;
-      max-width: 760px;
-      aspect-ratio: 760 / 450;
-      height: auto;
-
+      width: 760px;
+      height: 450px;
       position:relative;
       user-select:none;
       cursor:pointer;
@@ -309,6 +302,75 @@
       z-index:1;
     }
 
+    /* Overlay final */
+    .overlay{
+      position:fixed;
+      inset:0;
+      display:none;
+      place-items:center;
+      background:
+        radial-gradient(1000px 520px at 50% 25%, rgba(255,255,255,.75), rgba(255,31,90,.12)),
+        linear-gradient(135deg, rgba(255,241,246,.92), rgba(255,243,222,.92));
+      backdrop-filter: blur(8px);
+      z-index:50;
+      padding: 20px;
+    }
+    .overlay.show{ display:grid; }
+
+    .final-card{
+      width:min(720px, 92vw);
+      background: rgba(255,255,255,.78);
+      border: 1px solid rgba(255,255,255,.7);
+      border-radius: 32px;
+      box-shadow: 0 18px 70px rgba(0,0,0,.16);
+      padding: 22px 18px 20px;
+      text-align:center;
+      overflow:hidden;
+      position:relative;
+    }
+    .final-title{
+      font-size: clamp(28px, 4vw, 46px);
+      margin: 6px 0 8px;
+      font-weight: 1100;
+      letter-spacing:-0.02em;
+    }
+    .final-sub{
+      margin-top: 6px;
+      font-size: clamp(16px, 2.1vw, 20px);
+      font-weight: 900;
+      opacity: .9;
+    }
+    .big-heart{
+      font-size: 58px;
+      filter: drop-shadow(0 16px 30px rgba(255,31,90,.22));
+      animation: pulse 1.15s ease-in-out infinite;
+    }
+    @keyframes pulse{
+      0%,100%{ transform: scale(1); }
+      50%{ transform: scale(1.12); }
+    }
+
+    /* Fireworks hearts */
+    .fw{
+      position:fixed;
+      inset:0;
+      pointer-events:none;
+      z-index:60;
+      overflow:hidden;
+    }
+    .particle{
+      position:absolute;
+      font-size: 18px;
+      opacity: 0;
+      animation: pop 1.7s ease-out forwards;
+      filter: drop-shadow(0 10px 18px rgba(255,31,90,.20));
+    }
+    @keyframes pop{
+      0%{ transform: translate(0,0) scale(.9); opacity:0; }
+      10%{ opacity:1; }
+      100%{ transform: translate(var(--x), var(--y)) scale(1.25); opacity:0; }
+    }
+
     /* ===== MOBILE ===== */
     @media (max-width: 920px){
       .row{
@@ -383,11 +445,23 @@
     </section>
   </main>
 
+  <div class="overlay" id="overlay" aria-hidden="true">
+    <div class="final-card">
+      <div class="big-heart">❤️</div>
+      <div class="final-title">Je t’aime Hemen, pour toujours ✨</div>
+      <div class="final-sub">Rendez-vous le 13 pour la nuit de folie 😉✨</div>
+    </div>
+  </div>
+
+  <div class="fw" id="fw"></div>
+
   <script>
     const envelope = document.getElementById("envelope");
     const result = document.getElementById("result");
     const yesBtn = document.getElementById("yesBtn");
     const thinkBtn = document.getElementById("thinkBtn");
+    const overlay = document.getElementById("overlay");
+    const fw = document.getElementById("fw");
     const song = document.getElementById("song");
     const ambient = document.getElementById("ambient");
     const slidesEl = document.getElementById("slides");
@@ -396,16 +470,19 @@
     let audioUnlocked = false;
     let lastTap = 0;
 
-    // Coeurs
+    // Coeurs en continu
     const heartEmojis = ["💖","💘","💗","💝","💕","✨","🌟"];
     function spawnAmbient(){
       const h = document.createElement("div");
       h.className = "aheart";
       h.textContent = heartEmojis[Math.floor(Math.random()*heartEmojis.length)];
-      h.style.left = (Math.random()*100) + "%";
-      h.style.fontSize = (14 + Math.random()*14) + "px";
-      h.style.setProperty("--drift", (Math.random()*140 - 70) + "px");
-      const dur = 4.8 + Math.random()*4.2;
+      const left = Math.random() * 100;
+      const size = 14 + Math.random() * 14;
+      const drift = (Math.random() * 140 - 70) + "px";
+      const dur = 4.8 + Math.random() * 4.2;
+      h.style.left = left + "%";
+      h.style.fontSize = size + "px";
+      h.style.setProperty("--drift", drift);
       h.style.animationDuration = dur + "s";
       h.style.animationDelay = (Math.random()*0.9) + "s";
       ambient.appendChild(h);
@@ -425,27 +502,80 @@
 
     async function unlockAudio(){
       if(audioUnlocked) return;
-      try{ song.volume = 0.85; await song.play(); audioUnlocked = true; }catch(e){}
+      try{
+        song.volume = 0.85;
+        await song.play();
+        audioUnlocked = true;
+      }catch(e){}
     }
 
-    function openEnvelope(){ isOpen = true; envelope.classList.add("open"); unlockAudio(); }
-    function closeEnvelope(){ isOpen = false; envelope.classList.remove("open"); result.textContent = ""; }
-    function toggleOpen(){ isOpen ? closeEnvelope() : openEnvelope(); }
+    function openEnvelope(){
+      isOpen = true;
+      envelope.classList.add("open");
+      unlockAudio();
+    }
+    function closeEnvelope(){
+      isOpen = false;
+      envelope.classList.remove("open");
+      result.textContent = "";
+    }
+    function toggleOpen(){
+      if(isOpen) closeEnvelope();
+      else openEnvelope();
+    }
 
+    // ✅ OUVERTURE SUPER FIABLE (Safari + Chrome)
     function toggleFromTap(e){
+      // ignore si on a tap/click sur un bouton
       if (e.target.closest(".action")) return;
+
+      // anti double (touchend + click)
       const now = Date.now();
       if (now - lastTap < 350) return;
       lastTap = now;
+
       toggleOpen();
     }
 
     envelope.addEventListener("click", toggleFromTap);
-    envelope.addEventListener("touchend", (e) => { e.preventDefault(); toggleFromTap(e); }, { passive:false });
+    envelope.addEventListener("touchend", (e) => {
+      e.preventDefault();
+      toggleFromTap(e);
+    }, { passive:false });
 
+    // clavier (PC)
     envelope.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggleOpen(); }
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleOpen();
+      }
     });
+
+    function burstAt(x, y, count=18){
+      for(let i=0;i<count;i++){
+        const p = document.createElement("div");
+        p.className = "particle";
+        p.textContent = ["💖","💘","💝","💕","✨","❤️","🌟"][Math.floor(Math.random()*7)];
+        p.style.left = x + "px";
+        p.style.top = y + "px";
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 90 + Math.random() * 200;
+        p.style.setProperty("--x", (Math.cos(angle)*dist) + "px");
+        p.style.setProperty("--y", (Math.sin(angle)*dist) + "px");
+        fw.appendChild(p);
+        setTimeout(() => p.remove(), 1750);
+      }
+    }
+    function heartFireworks(durationMs=3600){
+      const start = Date.now();
+      const tick = () => {
+        const w = window.innerWidth;
+        const h = window.innerHeight;
+        burstAt(Math.random()*w, 80 + Math.random()*(h*0.55), 18);
+        if (Date.now() - start < durationMs) setTimeout(tick, 420);
+      };
+      tick();
+    }
 
     function doShake(){
       envelope.classList.remove("shake");
@@ -454,26 +584,32 @@
     }
 
     function onYes(e){
-      e.preventDefault(); e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
       openEnvelope();
       result.textContent = "OUIIIII 💞";
+      heartFireworks(3600);
+      overlay.classList.add("show");
+      overlay.setAttribute("aria-hidden","false");
       unlockAudio();
     }
-
     function onThink(e){
-      e.preventDefault(); e.stopPropagation();
+      e.preventDefault();
+      e.stopPropagation();
       openEnvelope();
       result.textContent = "Réessaie… tu t’es trompée 😇💗";
       doShake();
       unlockAudio();
     }
 
+    // ✅ boutons: click + touchend (Safari)
     yesBtn.addEventListener("click", onYes);
     yesBtn.addEventListener("touchend", (e)=>{ e.preventDefault(); onYes(e); }, { passive:false });
 
     thinkBtn.addEventListener("click", onThink);
     thinkBtn.addEventListener("touchend", (e)=>{ e.preventDefault(); onThink(e); }, { passive:false });
 
+    // déverrouille la musique au 1er geste
     window.addEventListener("pointerdown", unlockAudio, { once:true });
     window.addEventListener("touchstart", unlockAudio, { once:true, passive:true });
   </script>
