@@ -18,11 +18,8 @@
       --card: rgba(255,255,255,.72);
       --shadow: 0 18px 60px rgba(0,0,0,.14);
 
-      /* ✅ réglage principal : écart photo <-> enveloppe */
-      --gap: 18px;
-
-      /* ✅ réglage QUI MARCHE : rapproche l’enveloppe SANS bouger l’image */
-      --envShift: -65px; /* essaie -35px / -45px / -65px selon ton écran */
+      /* ✅ SEUL RÉGLAGE À TOUCHER POUR RAPPROCHER PHOTO <-> ENVELOPPE */
+      --gap: 28px; /* essaie 18px / 24px / 32px */
     }
 
     *{ box-sizing:border-box; }
@@ -100,55 +97,47 @@
       100%{ transform: translateY(-820px) translateX(var(--drift)) scale(1.35); opacity:0; }
     }
 
-    /* ======= LAYOUT ======= */
-.row{
-  display: grid;
-  grid-template-columns: 340px 820px; /* photo-zone | env-zone */
-  align-items: center;
-  justify-content: start;
-  column-gap: var(--gap);
-  padding: 10px 24px;
+    /* ======= LAYOUT (PROPRE & RESPONSIVE) ======= */
+    .row{
+      display:grid;
 
-  /* ✅ C’EST CETTE LIGNE QUI DÉPLACE TOUT À GAUCHE */
-  margin-left: -90px; /* ajuste: -40px / -50px / -70px */
+      /* ✅ IMPORTANT : 2e colonne flexible -> l’enveloppe ne colle plus au bord droit */
+      grid-template-columns: 340px minmax(0, 1fr);
 
-  position: relative;
-  z-index: 1;
-}
-
+      align-items:center;
+      justify-content:center;        /* centre l’ensemble dans la carte */
+      column-gap: var(--gap);        /* ✅ ton écart réel */
+      padding: 10px 24px;
+      position:relative;
+      z-index:1;
+    }
 
     @media (max-width: 920px){
       .row{
         grid-template-columns: 1fr;
         row-gap: 18px;
+        justify-content:center;
         padding: 10px 12px;
-        justify-content: start;
-        margin-left: -60px;
       }
     }
 
+    /* Zone photo */
     .photo-zone{
       width: 340px;
       height: 420px;
       display:flex;
       justify-content:center;
       align-items:center;
-
-      /* ✅ IMPORTANT : la photo ne bouge pas */
-      justify-self: start;
-      margin-left: 0;
-      transform: none;
+      justify-self:center; /* ✅ photo bien dans sa colonne */
     }
 
+    /* Zone enveloppe */
     .env-zone{
-      width: 820px;
       height: 480px;
       display:flex;
       justify-content:center;
       align-items:center;
-
-      /* ✅ IMPORTANT : on déplace SEULEMENT la colonne enveloppe */
-      margin-left: var(--envShift);
+      min-width:0; /* ✅ CRUCIAL en grid pour éviter les débordements */
     }
 
     /* ===== PHOTO ===== */
@@ -174,21 +163,24 @@
     }
     .slides img.active{ opacity:1; }
 
-    /* ===== ENVELOPPE ===== */
+    /* ===== ENVELOPPE (RESPONSIVE + PAS DE BOUGE) ===== */
     .envelope{
-      width: 760px;
-      height: 450px;
+      width: 100%;
+      max-width: 760px;
+      aspect-ratio: 760 / 450;
+      height: auto;
+
       position:relative;
       cursor:pointer;
       user-select:none;
 
-      /* ✅ aucun déplacement */
-      transform: none;
+      /* ✅ pas de mouvement */
+      transform:none;
       transition: filter .25s ease;
     }
 
     .envelope:hover{
-      transform: none; /* ✅ ne bouge pas */
+      transform:none; /* ✅ ne bouge pas */
       filter: drop-shadow(0 18px 35px rgba(0,0,0,.10));
     }
 
@@ -318,11 +310,11 @@
 
     .shake{ animation: shake .35s ease; }
     @keyframes shake{
-      0%   { transform: rotate(0deg); }
-      25%  { transform: rotate(-1deg); }
-      50%  { transform: rotate(1deg); }
-      75%  { transform: rotate(-.8deg); }
-      100% { transform: rotate(0deg); }
+      0%{ transform: rotate(0deg); }
+      25%{ transform: rotate(-1deg); }
+      50%{ transform: rotate(1deg); }
+      75%{ transform: rotate(-.8deg); }
+      100%{ transform: rotate(0deg); }
     }
 
     .result{
@@ -405,13 +397,9 @@
 
     @media (max-width: 520px){
       .photo-zone{ width: 320px; height: 380px; }
-      .env-zone{
-        width: 320px; height: 380px;
-        margin-left: 0; /* mobile : pas de décalage */
-      }
       .frame{ width: 250px; }
-      .envelope{ width: 430px; height: 285px; }
       .letter{ width: 320px; height: 300px; }
+      .env-zone{ height:auto; }
     }
   </style>
 </head>
